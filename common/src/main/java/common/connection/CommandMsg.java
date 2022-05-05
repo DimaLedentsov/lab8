@@ -20,6 +20,18 @@ public class CommandMsg implements Request {
         user = null;
         status = Status.DEFAULT;
     }
+    public  CommandMsg(){
+        commandName = null;
+        commandStringArgument=null;
+        worker = null;
+        status = Status.DEFAULT;
+    }
+    public  CommandMsg(String s){
+        commandName = s;
+        commandStringArgument=null;
+        worker = null;
+        status = Status.DEFAULT;
+    }
 
     public CommandMsg(String commandNm, String commandSA, Worker w, User usr) {
         commandName = commandNm;
@@ -29,16 +41,18 @@ public class CommandMsg implements Request {
         status = Status.DEFAULT;
     }
 
-    public void setStatus(Status s) {
+    public CommandMsg setStatus(Status s) {
         status = s;
+        return this;
     }
 
     public Status getStatus() {
         return status;
     }
 
-    public void setUser(User usr) {
+    public CommandMsg setUser(User usr) {
         user = usr;
+        return this;
     }
 
 

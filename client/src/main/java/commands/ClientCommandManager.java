@@ -8,12 +8,17 @@ import common.exceptions.*;
 import common.commands.*;
 import common.connection.*;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * command manager for client
  */
 public class ClientCommandManager extends CommandManager {
     private final Client client;
-
+    public final Lock lock = new ReentrantLock();
+    public final Condition condition = lock.newCondition();
     public ClientCommandManager(Client c) {
         client = c;
         addCommand(new ExecuteScriptCommand(this));
@@ -35,17 +40,20 @@ public class ClientCommandManager extends CommandManager {
                 res.info("shutting down...");
             }
         } else {
+            //lock.lock();
             try {
                 if(client.getUser()!=null && msg.getUser()==null) msg.setUser(client.getUser());
+                else client.setAttemptUser(msg.getUser());
                 client.send(msg);
-                res = (AnswerMsg) client.receive();
-                if(res.getStatus()== Response.Status.AUTH_SUCCESS){
-                    client.setUser(msg.getUser());
-                }
+               // while (!client.isReceivedRequest()) condition.await();
+                //condition.signalAll();
+                //res = (AnswerMsg) client.receive();
             } catch (ConnectionTimeoutException e) {
                 res.info("no attempts left, shutting down").setStatus(Response.Status.EXIT);
-            } catch (InvalidDataException | ConnectionException e) {
+            } catch (ConnectionException e) {
                 res.error(e.getMessage());
+            } finally {
+                //lock.unlock();
             }
         }
         print(res);

@@ -16,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -273,10 +274,11 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
         super.addWithoutIdGeneration(worker);
     }
 
-    public void clear(User user) {
+    public Collection<Worker> clear(User user) {
         databaseHandler.setCommitMode();
         databaseHandler.setSavepoint();
         Set<Integer> ids = new HashSet<>();
+
         try (PreparedStatement statement = databaseHandler.getPreparedStatement("DELETE FROM WORKERS WHERE user_login=? RETURNING id")) {
             statement.setString(1, user.getLogin());
             ResultSet resultSet = statement.executeQuery();
@@ -291,7 +293,9 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
         } finally {
             databaseHandler.setNormalMode();
         }
+        Collection<Worker> removed = getAll(ids);
         removeAll(ids);
+        return  removed;
     }
 
     @Override

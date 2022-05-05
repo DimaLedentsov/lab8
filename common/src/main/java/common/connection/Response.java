@@ -1,6 +1,9 @@
 package common.connection;
 
+import common.data.Worker;
+
 import java.io.Serializable;
+import java.util.Collection;
 
 public interface Response extends Serializable {
     String getMessage();
@@ -17,6 +20,12 @@ public interface Response extends Serializable {
         ERROR,
         FINE,
         EXIT,
-        AUTH_SUCCESS
+        AUTH_SUCCESS,
+        BROADCAST,
+        COLLECTION
     }
+
+    CollectionOperation getCollectionOperation();
+
+    public Collection getCollection();
 }

@@ -1,5 +1,9 @@
 package common.connection;
 
+import common.data.Worker;
+
+import java.util.Collection;
+
 /**
  * Message witch server send to client
  */
@@ -7,10 +11,13 @@ public class AnswerMsg implements Response {
     private static final long serialVersionUID = 666;
     private String msg;
     private Status status;
+    private Collection<Worker> collection;
+    private CollectionOperation collectionOperation;
 
     public AnswerMsg() {
         msg = "";
         status = Status.FINE;
+        collectionOperation = CollectionOperation.NONE;
     }
 
     /**
@@ -50,6 +57,22 @@ public class AnswerMsg implements Response {
     public AnswerMsg setStatus(Status st) {
         status = st;
         return this;
+    }
+
+
+    public AnswerMsg setCollectionOperation(CollectionOperation op){
+        collectionOperation = op;
+        return this;
+    }
+    public  CollectionOperation getCollectionOperation(){
+        return collectionOperation;
+    }
+    public AnswerMsg setCollection(Collection<Worker> c){
+        collection = c;
+        return  this;
+    }
+    public  Collection<Worker> getCollection(){
+        return  collection;
     }
 
     /**

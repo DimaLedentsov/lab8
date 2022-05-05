@@ -1,16 +1,13 @@
-package collection;
+package common.collection;
 
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonParseException;
-import com.google.gson.reflect.TypeToken;
+
+
 import common.data.Worker;
 import common.exceptions.CannotAddException;
 import common.exceptions.CollectionException;
 import common.exceptions.EmptyCollectionException;
 import common.exceptions.NoSuchIdException;
-import json.*;
 
 import java.lang.reflect.Type;
 import java.time.LocalDate;
@@ -23,17 +20,16 @@ import java.util.stream.Collectors;
 /**
  * Operates collection.
  */
-public class WorkerDequeManager implements WorkerManager {
-    private Deque<Worker> collection;
+public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements WorkerManager {
+    private T collection;
     private final java.time.LocalDateTime initDate;
     private final Set<Integer> uniqueIds;
 
     /**
      * Constructor, set start values
      */
-    public WorkerDequeManager() {
+    public WorkerManagerImpl() {
         uniqueIds = new ConcurrentSkipListSet<>();
-        collection = new ConcurrentLinkedDeque<>();
         initDate = java.time.LocalDateTime.now();
     }
 
@@ -41,7 +37,7 @@ public class WorkerDequeManager implements WorkerManager {
         if (collection.isEmpty())
             return 1;
         else {
-            int id = collection.element().getId() + 1;
+            int id = 1;
             if (uniqueIds.contains(id)) {
                 while (uniqueIds.contains(id)) id += 1;
             }
@@ -50,7 +46,7 @@ public class WorkerDequeManager implements WorkerManager {
     }
 
     public void sort() {
-        collection = collection.stream().sorted(new Worker.SortingComparator()).collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
+        //collection = collection.stream().sorted(new Worker.SortingComparator()).collect(Collectors.toCollection(LinkedList::new));
     }
 
     /**
@@ -58,7 +54,7 @@ public class WorkerDequeManager implements WorkerManager {
      *
      * @return Collection
      */
-    public Deque<Worker> getCollection() {
+    public Collection<Worker> getCollection() {
         return collection;
     }
 
@@ -89,16 +85,6 @@ public class WorkerDequeManager implements WorkerManager {
         collection.add(worker);
     }
 
-    protected Collection<Worker> getAll(Collection<Integer> ids){
-        Iterator<Integer> iterator = ids.iterator();
-        Collection<Worker> selected = new HashSet<>();
-        while (iterator.hasNext()){
-            Integer id = iterator.next();
-            selected.addAll(collection.stream().filter(w->w.getId()==id).collect(Collectors.toCollection(HashSet::new)));
-            iterator.remove();
-        }
-        return selected;
-    }
     protected void removeAll(Collection<Integer> ids){
         Iterator<Integer> iterator = ids.iterator();
         while (iterator.hasNext()){
@@ -183,8 +169,9 @@ public class WorkerDequeManager implements WorkerManager {
 
     public void removeFirst() {
         assertNotEmpty();
-        int id = collection.getFirst().getId();
-        collection.removeFirst();
+        Iterator<Worker> it =  collection.iterator();
+        int id = it.next().getId();
+        it.remove();
         uniqueIds.remove(id);
     }
 
@@ -252,31 +239,13 @@ public class WorkerDequeManager implements WorkerManager {
         return salaries;
     }
 
-    public void deserializeCollection(String json) {
-        try {
-            if (json == null || json.equals("")) {
-                collection = new ConcurrentLinkedDeque<>();
-            } else {
-                Type collectionType = new TypeToken<Queue<Worker>>() {
-                }.getType();
-                Gson gson = new GsonBuilder()
-                        .registerTypeAdapter(LocalDate.class, new LocalDateDeserializer())
-                        .registerTypeAdapter(Date.class, new DateDeserializer())
-                        .registerTypeAdapter(collectionType, new CollectionDeserializer(uniqueIds))
-                        .create();
-                collection = gson.fromJson(json.trim(), collectionType);
-            }
-        } catch (JsonParseException e) {
-            throw new CollectionException("cannot load");
-        }
+    @Override
+    public void deserializeCollection(String data) {
+
     }
 
+    @Override
     public String serializeCollection() {
-        if (collection == null || collection.isEmpty()) return "";
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDate.class, new LocalDateSerializer())
-                .registerTypeAdapter(Date.class, new DateSerializer())
-                .setPrettyPrinting().create();
-        return gson.toJson(collection);
+        return null;
     }
 }

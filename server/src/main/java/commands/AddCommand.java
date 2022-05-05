@@ -3,6 +3,7 @@ package commands;
 import collection.WorkerManager;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
+import common.connection.CollectionOperation;
 import common.exceptions.CommandException;
 import common.exceptions.InvalidDataException;
 
@@ -10,7 +11,7 @@ public class AddCommand extends CommandImpl {
     private final WorkerManager collectionManager;
 
     public AddCommand(WorkerManager cm) {
-        super("add", CommandType.NORMAL);
+        super("add", CommandType.NORMAL, CollectionOperation.ADD);
         collectionManager = cm;
     }
 

@@ -24,15 +24,16 @@ public class Main {
         String dbHost = "pg";
         String user = "s340384";
         String password = "pzg218";
-        String url = "jdbc:postgresql://" + dbHost + ":5432/studs";
-
+        //String url = "jdbc:postgresql://" + dbHost + ":5432/studs";
+        String url = "jdbc:postgresql://localhost:5432/postgres";
+        args = new String[]{"4445", "postgres", "postgres","s"};
         try {
             if (args.length == 4) {
                 strPort = args[0];
                 dbHost = args[1];
                 user = args[2];
                 password = args[3];
-                url = "jdbc:postgresql://" + dbHost + ":5432/studs";
+
             }
             if (args.length == 1) strPort = args[0];
             if (args.length == 0) Log.logger.info("no port passed by argument, hosted on " + strPort);

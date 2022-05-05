@@ -3,12 +3,13 @@ package commands;
 import collection.WorkerManager;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
+import common.connection.CollectionOperation;
 
 public class AddIfMaxCommand extends CommandImpl {
     private final WorkerManager collectionManager;
 
     public AddIfMaxCommand(WorkerManager cm) {
-        super("add_if_max", CommandType.NORMAL);
+        super("add_if_max", CommandType.NORMAL, CollectionOperation.ADD);
         collectionManager = cm;
     }
 

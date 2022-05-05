@@ -100,7 +100,7 @@ public abstract class CommandManager implements Commandable, Closeable {
             Command cmd = getCommand(msg);
             cmd.setArgument(msg);
             res = (AnswerMsg) cmd.run();
-
+            res.setCollectionOperation(cmd.getOperation());
         } catch (ExitException e) {
             res.setStatus(Response.Status.EXIT);
         } catch (CommandException | InvalidDataException | ConnectionException | FileException | CollectionException e) {

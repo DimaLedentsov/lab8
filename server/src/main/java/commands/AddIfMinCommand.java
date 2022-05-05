@@ -3,12 +3,13 @@ package commands;
 import collection.WorkerManager;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
+import common.connection.CollectionOperation;
 
 public class AddIfMinCommand extends CommandImpl {
     private final WorkerManager collectionManager;
 
     public AddIfMinCommand(WorkerManager cm) {
-        super("add_if_min", CommandType.NORMAL);
+        super("add_if_min", CommandType.NORMAL, CollectionOperation.ADD);
         collectionManager = cm;
     }
 

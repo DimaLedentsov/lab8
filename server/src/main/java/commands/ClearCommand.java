@@ -4,6 +4,8 @@ import collection.WorkerManager;
 import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
+import common.connection.AnswerMsg;
+import common.connection.Response;
 import common.exceptions.EmptyCollectionException;
 import common.exceptions.InvalidDataException;
 import database.WorkerDatabaseManager;
@@ -17,11 +19,13 @@ public class ClearCommand extends CommandImpl {
     }
 
     @Override
-    public String execute() throws InvalidDataException {
+    public Response run() throws InvalidDataException {
+        AnswerMsg answerMsg = new AnswerMsg();
         if (collectionManager.getCollection().isEmpty()) throw new EmptyCollectionException();
         User user = getArgument().getUser();
-        collectionManager.clear(user);
-        return "collection cleared";
+        answerMsg.setCollection(collectionManager.clear(user));
+        answerMsg.info( "collection cleared");
+        return answerMsg;
     }
 
 }

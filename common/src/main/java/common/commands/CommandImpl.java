@@ -1,8 +1,6 @@
 package common.commands;
 
-import common.connection.AnswerMsg;
-import common.connection.Request;
-import common.connection.Response;
+import common.connection.*;
 import common.data.Worker;
 import common.exceptions.*;
 
@@ -13,16 +11,27 @@ public abstract class CommandImpl implements Command {
     private final CommandType type;
     private final String name;
     private Request arg;
-
-    public CommandImpl(String n, CommandType t) {
+    private CollectionOperation operation;
+    public CommandImpl(String n, CommandType t, CollectionOperation op) {
         name = n;
         type = t;
+        operation = op;
     }
+
+    public  CommandImpl(String n, CommandType t){
+        name = n;
+        type = t;
+        operation = CollectionOperation.NONE;
+    }
+
 
     public CommandType getType() {
         return type;
     }
 
+    public CollectionOperation getOperation(){
+        return operation;
+    }
     public String getName() {
         return name;
     }
@@ -49,6 +58,8 @@ public abstract class CommandImpl implements Command {
     public Response run() throws InvalidDataException, CommandException, FileException, ConnectionException, CollectionException {
         AnswerMsg res = new AnswerMsg();
         res.info(execute());
+        res.setCollectionOperation(operation);
+        if(res.getCollectionOperation()!= CollectionOperation.NONE)res.getCollection().add(getWorkerArg());
         return res;
     }
 
