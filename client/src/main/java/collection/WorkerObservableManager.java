@@ -4,15 +4,17 @@ import common.collection.WorkerManagerImpl;
 import common.connection.CollectionOperation;
 import common.connection.Response;
 import common.data.Worker;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
-public class WorkerObservableManager extends WorkerManagerImpl<LinkedList<Worker>> {
-    private List<Worker> collection;
+public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Worker>> {
+    private ObservableList<Worker> collection;
     public WorkerObservableManager(){
-        collection = new LinkedList<>();
+        collection = FXCollections.emptyObservableList();
     }
 
     public void applyChanges(Response response){
@@ -33,5 +35,8 @@ public class WorkerObservableManager extends WorkerManagerImpl<LinkedList<Worker
                 super.updateByID(worker.getId(),worker);
             }
         }
+    }
+    public ObservableList getCollection(){
+        return collection;
     }
 }

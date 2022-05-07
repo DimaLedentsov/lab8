@@ -2,14 +2,19 @@ package main;
 
 
 import java.io.PrintStream;
+import java.util.ResourceBundle;
 
 import client.Client;
+import common.data.Worker;
 import common.exceptions.*;
+import controllers.AskWindowController;
 import controllers.LoginWindowController;
+import controllers.MainWindowController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import controllers.tools.*;
 import static common.io.OutputManager.*;
@@ -19,13 +24,25 @@ public class App extends Application {
     //public static Logger logger = LogManager.getLogger("logger");
     //static final Logger logger = LogManager.getRootLogger();
     private static final String APP_TITLE = "Collection Keeper";
-    Client client;
-    String address;
-    int port;
-    private static ObservableResourceFactory resourceFactory;
+    public static final String BUNDLE = "bundles.gui";
     private Stage primaryStage;
-    private void initialize(String[] args) throws Exception {
-        System.setOut(new PrintStream(System.out, true, "UTF-8"));
+    static Client client;
+    static String address;
+    static int port;
+    private static ObservableResourceFactory resourceFactory;
+
+    public static void main(String[] args) {
+        resourceFactory = new ObservableResourceFactory();
+        resourceFactory.setResources(ResourceBundle.getBundle(BUNDLE));
+        //OutputerUI.setResourceFactory(resourceFactory);
+        //Outputer.setResourceFactory(resourceFactory);
+
+
+        if (initialize(args)) launch(args);
+        else System.exit(0);
+    }
+    private static boolean initialize(String[] args) {
+        /*//System.setOut(new PrintStream(System.out, true, "UTF-8"));
         print("\r\n __          __           _                 __  __                                         \r\n \\ \\        / /          | |               |  \\/  |                                        \r\n  \\ \\  /\\  / /___   _ __ | | __ ___  _ __  | \\  / |  __ _  _ __    __ _   __ _   ___  _ __ \r\n   \\ \\/  \\/ // _ \\ | '__|| |/ // _ \\| '__| | |\\/| | / _` || '_ \\  / _` | / _` | / _ \\| '__|\r\n    \\  /\\  /| (_) || |   |   <|  __/| |    | |  | || (_| || | | || (_| || (_| ||  __/| |   \r\n     \\/  \\/  \\___/ |_|   |_|\\_\\\\___||_|    |_|  |_| \\__,_||_| |_| \\__,_| \\__, | \\___||_|   \r\n                                                                          __/ |            \r\n                                                                         |___/             \r\n");
         print("\t\t\t\t\t\t\t\t\t by Dimka Ledentsov");
         print("\n");
@@ -53,14 +70,25 @@ public class App extends Application {
 
         } catch (ConnectionException e) {
             print(e.getMessage());
+            return false;
+        }*/
+        return true;
+    }
+    @Override public void init(){
+        resourceFactory = new ObservableResourceFactory();
+        resourceFactory.setResources(ResourceBundle.getBundle(BUNDLE));
+
+        try {
+            client = new Client(address,port);
+        } catch (ConnectionException e) {
+            e.printStackTrace();
         }
     }
-
     @Override
     public void start(Stage stage) {
         try {
-            this.primaryStage = stage;
 
+            primaryStage = stage;
             FXMLLoader loginWindowLoader = new FXMLLoader();
             loginWindowLoader.setLocation(getClass().getResource("/view/LoginWindow.fxml"));
             Parent loginWindowRootNode = loginWindowLoader.load();
@@ -68,13 +96,58 @@ public class App extends Application {
             LoginWindowController loginWindowController = loginWindowLoader.getController();
             loginWindowController.setApp(this);
             loginWindowController.setClient(client);
-            //loginWindowController.initLangs(resourceFactory);
+            loginWindowController.initLangs(resourceFactory);
 
-            primaryStage.setTitle(APP_TITLE);
+            stage.setTitle(APP_TITLE);
 
-            primaryStage.setScene(loginWindowScene);
-            primaryStage.setResizable(false);
-            primaryStage.show();
+            stage.setScene(loginWindowScene);
+            stage.setResizable(false);
+            stage.show();
+            //setMainWindow();
+        } catch (Exception exception) {
+            // TODO: Обработать ошибки
+            System.out.println(exception);
+            exception.printStackTrace();
+        }
+    }
+
+
+    public void setMainWindow() {
+        try {
+            FXMLLoader mainWindowLoader = new FXMLLoader();
+            mainWindowLoader.setLocation(getClass().getResource("/view/MainWindow.fxml"));
+            Parent mainWindowRootNode = mainWindowLoader.load();
+            Scene mainWindowScene = new Scene(mainWindowRootNode);
+            MainWindowController mainWindowController = mainWindowLoader.getController();
+            mainWindowController.initLangs(resourceFactory);
+
+            FXMLLoader askWindowLoader = new FXMLLoader();
+            askWindowLoader.setLocation(getClass().getResource("/view/AskWindow.fxml"));
+            Parent askWindowRootNode = askWindowLoader.load();
+            Scene askWindowScene = new Scene(askWindowRootNode);
+            Stage askStage = new Stage();
+            askStage.setTitle(APP_TITLE);
+            askStage.setScene(askWindowScene);
+            askStage.setResizable(false);
+            askStage.initModality(Modality.WINDOW_MODAL);
+            askStage.initOwner(primaryStage);
+            AskWindowController askWindowController = askWindowLoader.getController();
+            askWindowController.setAskStage(askStage);
+            askWindowController.initLangs(resourceFactory);
+
+            mainWindowController.setClient(client);
+            mainWindowController.setUsername("aa");//client.getUser().getLogin());
+            mainWindowController.setAskStage(askStage);
+            mainWindowController.setPrimaryStage(primaryStage);
+            mainWindowController.setAskWindowController(askWindowController);
+            mainWindowController.refreshButtonOnAction();
+
+            primaryStage.setScene(mainWindowScene);
+            primaryStage.setMinWidth(mainWindowScene.getWidth());
+            primaryStage.setMinHeight(mainWindowScene.getHeight());
+            primaryStage.setResizable(true);
+
+
         } catch (Exception exception) {
             // TODO: Обработать ошибки
             System.out.println(exception);

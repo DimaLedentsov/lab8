@@ -5,7 +5,7 @@ plugins {
 }
 
 application {
-    mainClass = 'main.Main'
+    mainClass = 'main.App'
 }
 
 
@@ -43,7 +43,7 @@ run {
 
 jar {
     manifest {
-        attributes "Main-Class": "main.Main"
+        attributes "Main-Class": "main.App"
     }
 }
 shadowJar {

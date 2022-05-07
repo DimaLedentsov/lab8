@@ -12,6 +12,7 @@ import java.util.Collection;
 import collection.WorkerObservableManager;
 import commands.ClientCommandManager;
 import common.auth.User;
+import common.collection.WorkerManager;
 import common.connection.*;
 import common.data.Worker;
 import common.exceptions.*;
@@ -241,6 +242,9 @@ public class Client extends Thread implements SenderReceiver {
         return connected;
     }
 
+    public WorkerObservableManager getWorkerManager(){
+        return collectionManager;
+    }
     /**
      * close client
      */

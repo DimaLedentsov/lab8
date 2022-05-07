@@ -7,6 +7,7 @@ import controllers.tools.*;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
+
 import main.App;
 
 /**
@@ -43,6 +44,7 @@ public class LoginWindowController {
                 passwordField.getText(),
                 registerCheckBox.isSelected());
         app.setMainWindow();
+
         if (!client.isConnected()) {
             isConnectedLabel.textProperty().bind(resourceFactory.getStringBinding("NotConnected"));
             isConnectedLabel.setTextFill(NOT_CONNECTED_COLOR);
@@ -77,8 +79,8 @@ public class LoginWindowController {
         this.client = client;
     }
 
-    public void initLangs(ObservableResourceFactory resourceFactory) {
-        this.resourceFactory = resourceFactory;
+    public void initLangs(ObservableResourceFactory r) {
+        resourceFactory = r;
         bindGuiLanguage();
     }
 }
