@@ -21,25 +21,23 @@ import java.util.stream.Collectors;
  * Operates collection.
  */
 public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements WorkerManager {
-    private T collection;
+
     private final java.time.LocalDateTime initDate;
-    private final Set<Integer> uniqueIds;
 
     /**
      * Constructor, set start values
      */
     public WorkerManagerImpl() {
-        uniqueIds = new ConcurrentSkipListSet<>();
         initDate = java.time.LocalDateTime.now();
     }
 
     public int generateNextId() {
-        if (collection.isEmpty())
+        if (getCollection().isEmpty())
             return 1;
         else {
             int id = 1;
-            if (uniqueIds.contains(id)) {
-                while (uniqueIds.contains(id)) id += 1;
+            if (getUniqueIds().contains(id)) {
+                while (getUniqueIds().contains(id)) id += 1;
             }
             return id;
         }
@@ -54,9 +52,8 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      *
      * @return Collection
      */
-    public Collection<Worker> getCollection() {
-        return collection;
-    }
+    public abstract Collection<Worker> getCollection();
+
 
     /**
      * Add element to collection
@@ -65,14 +62,14 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      */
     public void add(Worker worker) {
         int id = generateNextId();
-        uniqueIds.add(id);
+        getUniqueIds().add(id);
         worker.setId(id);
-        collection.add(worker);
+        getCollection().add(worker);
     }
 
     public Worker getByID(Integer id){
         assertNotEmpty();
-        Optional<Worker> worker = collection.stream()
+        Optional<Worker> worker = getCollection().stream()
                 .filter(w -> w.getId() == id)
                 .findFirst();
         if(!worker.isPresent()){
@@ -81,15 +78,15 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
         return worker.get();
     }
     protected void addWithoutIdGeneration(Worker worker){
-        uniqueIds.add(worker.getId());
-        collection.add(worker);
+        getUniqueIds().add(worker.getId());
+        getCollection().add(worker);
     }
 
     protected void removeAll(Collection<Integer> ids){
         Iterator<Integer> iterator = ids.iterator();
         while (iterator.hasNext()){
             Integer id = iterator.next();
-            collection.removeIf(worker -> worker.getId()==id);
+            getCollection().removeIf(worker -> worker.getId()==id);
             iterator.remove();
         }
     }
@@ -100,7 +97,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @return Information
      */
     public String getInfo() {
-        return "Database of Worker, size: " + collection.size() + ", initialization date: " + initDate.toString();
+        return "Database of Worker, size: " + getCollection().size() + ", initialization date: " + initDate.toString();
     }
 
     /**
@@ -110,11 +107,11 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @return is it used or not
      */
     public boolean checkID(Integer ID) {
-        return uniqueIds.contains(ID);
+        return getUniqueIds().contains(ID);
     }
 
     public void assertNotEmpty(){
-        if(collection.isEmpty()) throw new EmptyCollectionException();
+        if(getCollection().isEmpty()) throw new EmptyCollectionException();
     }
     /**
      * Delete element by ID
@@ -124,14 +121,14 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
 
     public void removeByID(Integer id) {
         assertNotEmpty();
-        Optional<Worker> worker = collection.stream()
+        Optional<Worker> worker = getCollection().stream()
                 .filter(w -> w.getId() == id)
                 .findFirst();
         if(!worker.isPresent()){
             throw new NoSuchIdException(id);
         }
-        collection.remove(worker.get());
-        uniqueIds.remove(id);
+        getCollection().remove(worker.get());
+        getUniqueIds().remove(id);
     }
 
     /**
@@ -141,15 +138,15 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      */
     public void updateByID(Integer id, Worker newWorker) {
         assertNotEmpty();
-        Optional<Worker> worker = collection.stream()
+        Optional<Worker> worker = getCollection().stream()
                 .filter(w -> w.getId() == id)
                 .findFirst();
         if (!worker.isPresent()) {
             throw new NoSuchIdException(id);
         }
-        collection.remove(worker.get());
+        getCollection().remove(worker.get());
         newWorker.setId(id);
-        collection.add(newWorker);
+        getCollection().add(newWorker);
     }
 
     /**
@@ -158,21 +155,21 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @return Size of collection
      */
     public int getSize() {
-        return collection.size();
+        return getCollection().size();
     }
 
 
     public void clear() {
-        collection.clear();
-        uniqueIds.clear();
+        getCollection().clear();
+        getUniqueIds().clear();
     }
 
     public void removeFirst() {
         assertNotEmpty();
-        Iterator<Worker> it =  collection.iterator();
+        Iterator<Worker> it =  getCollection().iterator();
         int id = it.next().getId();
         it.remove();
-        uniqueIds.remove(id);
+        getUniqueIds().remove(id);
     }
 
     /**
@@ -181,7 +178,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @param worker Element
      */
     public void addIfMax(Worker worker) {
-        if (collection.stream()
+        if (getCollection().stream()
                 .max(Worker::compareTo)
                 .filter(w -> w.compareTo(worker) == 1)
                 .isPresent()) {
@@ -196,7 +193,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @param worker Element
      */
     public void addIfMin(Worker worker) {
-        if (collection.stream()
+        if (getCollection().stream()
                 .min(Worker::compareTo)
                 .filter(w -> w.compareTo(worker) < 0)
                 .isPresent()) {
@@ -207,7 +204,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
 
     public List<Worker> filterStartsWithName(String start) {
         assertNotEmpty();
-        return collection.stream()
+        return getCollection().stream()
                 .filter(w -> w.getName().startsWith(start.trim()))
                 .collect(Collectors.toList());
     }
@@ -215,7 +212,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
     public Map<LocalDate, Integer> groupByEndDate() {
         assertNotEmpty();
         HashMap<LocalDate, Integer> map = new HashMap<>();
-        collection.stream()
+        getCollection().stream()
                 .filter((worker -> worker.getEndDate() != null))
                 .forEach((worker) -> {
                     LocalDate endDate = worker.getEndDate();
@@ -232,12 +229,13 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
     public List<Long> getUniqueSalaries() {
         assertNotEmpty();
         List<Long> salaries = new LinkedList<>();
-        salaries = collection.stream()
+        salaries = getCollection().stream()
                 .map(Worker::getSalary)
                 .distinct()
                 .collect(Collectors.toList());
         return salaries;
     }
+
 
     @Override
     public void deserializeCollection(String data) {
@@ -248,4 +246,5 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
     public String serializeCollection() {
         return null;
     }
+    abstract public Set<Integer> getUniqueIds();
 }

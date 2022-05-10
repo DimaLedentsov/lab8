@@ -4,6 +4,7 @@ import collection.WorkerManager;
 import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
+import common.connection.CollectionOperation;
 import common.exceptions.AuthException;
 import common.exceptions.EmptyCollectionException;
 import common.exceptions.InvalidDataException;
@@ -12,7 +13,7 @@ public class RemoveFirstCommand extends CommandImpl {
     private final WorkerManager collectionManager;
 
     public RemoveFirstCommand(WorkerManager cm) {
-        super("remove_first", CommandType.NORMAL);
+        super("remove_first", CommandType.NORMAL, CollectionOperation.REMOVE);
         collectionManager = cm;
     }
 

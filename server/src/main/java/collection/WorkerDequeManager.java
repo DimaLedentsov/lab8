@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 /**
  * Operates collection.
  */
-public class WorkerDequeManager implements WorkerManager {
+public class WorkerDequeManager  implements WorkerManager {
     private Deque<Worker> collection;
     private final java.time.LocalDateTime initDate;
     private final Set<Integer> uniqueIds;

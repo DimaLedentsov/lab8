@@ -95,6 +95,8 @@ public class ServerCommandManager extends CommandManager {
                 break;
             case AUTH_SUCCESS: //check if auth command was invoked by server terminal
                 if (isGeneratedByServer) server.setHostUser(user);
+                Log.logger.info(message + res.getMessage());
+                break;
             default:
                 Log.logger.info(message + res.getMessage());
                 break;

@@ -42,7 +42,7 @@ public class App extends Application {
         else System.exit(0);
     }
     private static boolean initialize(String[] args) {
-        /*//System.setOut(new PrintStream(System.out, true, "UTF-8"));
+        //System.setOut(new PrintStream(System.out, true, "UTF-8"));
         print("\r\n __          __           _                 __  __                                         \r\n \\ \\        / /          | |               |  \\/  |                                        \r\n  \\ \\  /\\  / /___   _ __ | | __ ___  _ __  | \\  / |  __ _  _ __    __ _   __ _   ___  _ __ \r\n   \\ \\/  \\/ // _ \\ | '__|| |/ // _ \\| '__| | |\\/| | / _` || '_ \\  / _` | / _` | / _ \\| '__|\r\n    \\  /\\  /| (_) || |   |   <|  __/| |    | |  | || (_| || | | || (_| || (_| ||  __/| |   \r\n     \\/  \\/  \\___/ |_|   |_|\\_\\\\___||_|    |_|  |_| \\__,_||_| |_| \\__,_| \\__, | \\___||_|   \r\n                                                                          __/ |            \r\n                                                                         |___/             \r\n");
         print("\t\t\t\t\t\t\t\t\t by Dimka Ledentsov");
         print("\n");
@@ -71,7 +71,7 @@ public class App extends Application {
         } catch (ConnectionException e) {
             print(e.getMessage());
             return false;
-        }*/
+        }
         return true;
     }
     @Override public void init(){
@@ -80,6 +80,7 @@ public class App extends Application {
 
         try {
             client = new Client(address,port);
+            client.start();
         } catch (ConnectionException e) {
             e.printStackTrace();
         }
@@ -103,6 +104,8 @@ public class App extends Application {
             stage.setScene(loginWindowScene);
             stage.setResizable(false);
             stage.show();
+
+
             //setMainWindow();
         } catch (Exception exception) {
             // TODO: Обработать ошибки
@@ -146,6 +149,8 @@ public class App extends Application {
             primaryStage.setMinWidth(mainWindowScene.getWidth());
             primaryStage.setMinHeight(mainWindowScene.getHeight());
             primaryStage.setResizable(true);
+
+
 
 
         } catch (Exception exception) {

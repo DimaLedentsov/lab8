@@ -52,6 +52,7 @@ public class Client extends Thread implements SenderReceiver {
         connected = false;
         commandManager = new ClientCommandManager(this);
         collectionManager = new WorkerObservableManager();
+        setDaemon(true);
         setName("client thread");
     }
 
@@ -65,8 +66,8 @@ public class Client extends Thread implements SenderReceiver {
     public User getUser(){
         return user;
     }
-    public void setAttemptUser(User user){
-        attempt = user;
+    public void setAttemptUser(User u){
+        attempt = u;
     }
 
     public User getAttemptUser() {
@@ -199,6 +200,7 @@ public class Client extends Thread implements SenderReceiver {
                 switch (response.getStatus()) {
                     case COLLECTION:
                         collectionManager.applyChanges(response);
+                        connected = true;
                         break;
                     case BROADCAST:
                         //commandManager.condition.await();
@@ -206,7 +208,7 @@ public class Client extends Thread implements SenderReceiver {
                         collectionManager.applyChanges(response);
                         break;
                     case AUTH_SUCCESS:
-                        setUser(getAttemptUser());
+                        user = attempt;
                         break;
                     default:
                         print(response.getMessage());
@@ -223,15 +225,20 @@ public class Client extends Thread implements SenderReceiver {
     }
 
     public void processAuthentication(String login, String password, boolean register){
-        User user = new User(login,password);
+        attempt = new User(login,password);
+        CommandMsg msg = new CommandMsg();
         if(register){
-            CommandMsg msg = new CommandMsg("register").setStatus(Request.Status.DEFAULT).setUser(user);
-            try {
-                send(msg);
+            msg = new CommandMsg("register").setStatus(Request.Status.DEFAULT).setUser(attempt);
 
-            } catch (ConnectionException e) {
-                connected=false;
-            }
+        }
+        else {
+            msg = new CommandMsg("login").setStatus(Request.Status.DEFAULT).setUser(attempt);
+        }
+        try {
+            send(msg);
+
+        } catch (ConnectionException e) {
+            connected=false;
         }
     }
     public void consoleMode(){
@@ -245,6 +252,7 @@ public class Client extends Thread implements SenderReceiver {
     public WorkerObservableManager getWorkerManager(){
         return collectionManager;
     }
+    public ClientCommandManager getCommandManager(){return commandManager;}
     /**
      * close client
      */
@@ -258,4 +266,5 @@ public class Client extends Thread implements SenderReceiver {
         commandManager.close();
         socket.close();
     }
+
 }

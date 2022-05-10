@@ -42,9 +42,11 @@ public class ClientCommandManager extends CommandManager {
         } else {
             //lock.lock();
             try {
+
                 if(client.getUser()!=null && msg.getUser()==null) msg.setUser(client.getUser());
                 else client.setAttemptUser(msg.getUser());
                 client.send(msg);
+                //if(msg.getUser()!=null)print(msg.getUser().getLogin());
                // while (!client.isReceivedRequest()) condition.await();
                 //condition.signalAll();
                 //res = (AnswerMsg) client.receive();

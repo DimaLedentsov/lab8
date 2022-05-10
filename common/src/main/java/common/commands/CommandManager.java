@@ -1,19 +1,13 @@
 package common.commands;
 
-import common.connection.AnswerMsg;
-import common.connection.CommandMsg;
-import common.connection.Request;
-import common.connection.Response;
+import common.connection.*;
 import common.exceptions.*;
 import common.io.ConsoleInputManager;
 import common.io.FileInputManager;
 import common.io.InputManager;
 
 import java.io.Closeable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Stack;
+import java.util.*;
 
 import static common.io.OutputManager.print;
 
@@ -101,6 +95,12 @@ public abstract class CommandManager implements Commandable, Closeable {
             cmd.setArgument(msg);
             res = (AnswerMsg) cmd.run();
             res.setCollectionOperation(cmd.getOperation());
+
+           /* if(res.getCollectionOperation()!= CollectionOperation.NONE){
+                if(res.getCollection()==null) res.setCollection(new HashSet<>());
+                res.getCollection().add(msg.getWorker());
+            }*/
+
         } catch (ExitException e) {
             res.setStatus(Response.Status.EXIT);
         } catch (CommandException | InvalidDataException | ConnectionException | FileException | CollectionException e) {

@@ -51,7 +51,7 @@ public class Server extends Thread implements SenderReceiver {
     private void init(int p, Properties properties) throws ConnectionException, DatabaseException {
         running = true;
         port = p;
-
+        setDaemon(true);
         hostUser = null;
         receiverThreadPool = Executors.newFixedThreadPool(MAX_CLIENTS);
         senderThreadPool = Executors.newFixedThreadPool(MAX_CLIENTS);
@@ -131,6 +131,7 @@ public class Server extends Thread implements SenderReceiver {
     }
 
     public void broadcast(Response response) {
+        Log.logger.trace("broadcasting changes");
         for(InetSocketAddress client: activeClients){
             responseQueue.offer(new AbstractMap.SimpleEntry<>(client, response));
         }
@@ -193,6 +194,8 @@ public class Server extends Thread implements SenderReceiver {
             Log.logger.error(e.getMessage());
         }
 
+
+        System.out.println(commandManager.getCommand(request).getOperation().toString());
         if(answerMsg.getCollectionOperation()!= CollectionOperation.NONE && answerMsg.getStatus()==Response.Status.FINE){
             answerMsg.setStatus(Response.Status.BROADCAST);
             broadcast(answerMsg);

@@ -1,39 +1,33 @@
 package controllers;
 
 
+import common.connection.CommandMsg;
 import common.data.*;
 import common.exceptions.InvalidDataException;
-import common.exceptions.InvalidDateFormatException;
-import common.utils.DateConverter;
+import javafx.animation.ScaleTransition;
+import javafx.scene.shape.Circle;
+import javafx.scene.text.Font;
 import main.App;
 import client.Client;
 import controllers.tools.ObservableResourceFactory;
-import io.OutputterUI;
 
-import javafx.animation.ScaleTransition;
-import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
 import javafx.scene.shape.Shape;
-import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import main.App;
-import org.controlsfx.control.table.TableFilter;
+//import org.controlsfx.control.table.TableFilter;
 
 import java.io.File;
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -145,8 +139,8 @@ public class MainWindowController {
     private FileChooser fileChooser;
     private AskWindowController askWindowController;
     private Map<String, Color> userColorMap;
-    private Map<Shape, Long> shapeMap;
-    private Map<Long, Text> textMap;
+    private Map<Shape, Integer> shapeMap;
+    private Map<Integer, Text> textMap;
     private Shape prevClicked;
     private Color prevColor;
     private Random randomGenerator;
@@ -200,7 +194,8 @@ public class MainWindowController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getFullName()));
         organizationTypeColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getType()));
-        TableFilter.forTableView(workerTable).apply();
+        //workerTable.setItems(FXCollections.observableArrayList());
+       //s TableFilter<Worker> tableFilter = TableFilter.forTableView(workerTable).apply();
     }
 
     /**
@@ -275,12 +270,12 @@ public class MainWindowController {
         //askWindowController.clearMarine();
 
         try {
-            Worker marineRaw = askWindowController.readWorker();
-            marineRaw.setUserLogin("BB");
-            System.out.println(marineRaw.toString());
+            client.getCommandManager().runCommand(new CommandMsg("add").setWorker(askWindowController.readWorker()));
         } catch (InvalidDataException e) {
-            new OutputterUI().error("aa");
+
         }
+        workerTable.refresh();
+        refreshCanvas();
         //if (marineRaw != null) requestAction(ADD_COMMAND_NAME, "", marineRaw);*/
     }
 
@@ -289,16 +284,27 @@ public class MainWindowController {
      */
     @FXML
     private void updateButtonOnAction() {
-        Worker worker = null;
+       /* Worker worker = null;
         try {
             worker = new DefaultWorker("a",new Coordinates(1,2L),1000L, DateConverter.parseLocalDate("2000-01-01"),
                     Position.BAKER,Status.PROBATION,new Organization("XXX",OrganizationType.GOVERNMENT));
         } catch (InvalidDateFormatException e) {
             e.printStackTrace();
         }
-        workerTable.setItems(FXCollections.observableArrayList(worker));
+        workerTable.getItems().add(worker);
+*/
+        Worker worker = workerTable.getSelectionModel().getSelectedItem();
+        if(worker!=null) {
+            askWindowController.setWorker(worker);
+            try {
+                client.getCommandManager().runCommand(new CommandMsg("update").setArgument(Integer.toString(worker.getId())).setWorker(askWindowController.readWorker()));
+            } catch (InvalidDataException e) {
+                e.printStackTrace();
+            }
+        }
+        workerTable.refresh();
+        refreshCanvas();
 
-        workerTable.getSelectionModel().clearSelection();
         /*if (!spaceMarineTable.getSelectionModel().isEmpty()) {
             long id = spaceMarineTable.getSelectionModel().getSelectedItem().getId();
             askWindowController.setMarine(spaceMarineTable.getSelectionModel().getSelectedItem());
@@ -314,6 +320,10 @@ public class MainWindowController {
      */
     @FXML
     private void removeButtonOnAction() {
+        Worker worker = workerTable.getSelectionModel().getSelectedItem();
+        if(worker!=null) client.getCommandManager().runCommand(new CommandMsg("remove_by_id").setArgument(Integer.toString(worker.getId())));
+        workerTable.refresh();
+        refreshCanvas();
         /*if (!spaceMarineTable.getSelectionModel().isEmpty())
             requestAction(REMOVE_COMMAND_NAME,
                     spaceMarineTable.getSelectionModel().getSelectedItem().getId().toString(), null);
@@ -412,33 +422,33 @@ public class MainWindowController {
      * Refreshes canvas.
      */
     private void refreshCanvas() {
-        /*shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
+        shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
         shapeMap.clear();
         textMap.values().forEach(s -> canvasPane.getChildren().remove(s));
         textMap.clear();
-        for (SpaceMarine marine : spaceMarineTable.getItems()) {
-            if (!userColorMap.containsKey(marine.getOwner().getUsername()))
-                userColorMap.put(marine.getOwner().getUsername(),
+        for (Worker worker : workerTable.getItems()) {
+            if (!userColorMap.containsKey(worker.getUserLogin()))
+                userColorMap.put(worker.getUserLogin(),
                         Color.color(randomGenerator.nextDouble(), randomGenerator.nextDouble(), randomGenerator.nextDouble()));
 
-            double size = Math.min(marine.getHealth(), MAX_SIZE);
+            double size = Math.min(worker.getSalary(), MAX_SIZE);
 
-            Shape circleObject = new Circle(size, userColorMap.get(marine.getOwner().getUsername()));
+            Shape circleObject = new Circle(size, userColorMap.get(worker.getUserLogin()));
             circleObject.setOnMouseClicked(this::shapeOnMouseClicked);
-            circleObject.translateXProperty().bind(canvasPane.widthProperty().divide(2).add(marine.getCoordinates().getX()));
-            circleObject.translateYProperty().bind(canvasPane.heightProperty().divide(2).subtract(marine.getCoordinates().getY()));
+            circleObject.translateXProperty().bind(canvasPane.widthProperty().divide(2).add(worker.getCoordinates().getX()));
+            circleObject.translateYProperty().bind(canvasPane.heightProperty().divide(2).subtract(worker.getCoordinates().getY()));
 
-            Text textObject = new Text(marine.getId().toString());
+            Text textObject = new Text(Integer.toString(worker.getId()));
             textObject.setOnMouseClicked(circleObject::fireEvent);
             textObject.setFont(Font.font(size / 3));
-            textObject.setFill(userColorMap.get(marine.getOwner().getUsername()).darker());
+            textObject.setFill(userColorMap.get(worker.getUserLogin()).darker());
             textObject.translateXProperty().bind(circleObject.translateXProperty().subtract(textObject.getLayoutBounds().getWidth() / 2));
             textObject.translateYProperty().bind(circleObject.translateYProperty().add(textObject.getLayoutBounds().getHeight() / 4));
 
             canvasPane.getChildren().add(circleObject);
             canvasPane.getChildren().add(textObject);
-            shapeMap.put(circleObject, marine.getId());
-            textMap.put(marine.getId(), textObject);
+            shapeMap.put(circleObject, worker.getId());
+            textMap.put(worker.getId(), textObject);
 
             ScaleTransition circleAnimation = new ScaleTransition(ANIMATION_DURATION, circleObject);
             ScaleTransition textAnimation = new ScaleTransition(ANIMATION_DURATION, textObject);
@@ -452,18 +462,18 @@ public class MainWindowController {
             textAnimation.setToY(1);
             circleAnimation.play();
             textAnimation.play();
-        }*/
+        }
     }
 
     /**
      * Shape on mouse clicked.
      */
     private void shapeOnMouseClicked(MouseEvent event) {
-        /*Shape shape = (Shape) event.getSource();
+        Shape shape = (Shape) event.getSource();
         long id = shapeMap.get(shape);
-        for (SpaceMarine marine : spaceMarineTable.getItems()) {
-            if (marine.getId() == id) {
-                spaceMarineTable.getSelectionModel().select(marine);
+        for (Worker worker : workerTable.getItems()) {
+            if (worker.getId() == id) {
+                workerTable.getSelectionModel().select(worker);
                 break;
             }
         }
@@ -472,7 +482,7 @@ public class MainWindowController {
         }
         prevClicked = shape;
         prevColor = (Color) shape.getFill();
-        shape.setFill(prevColor.brighter());*/
+        shape.setFill(prevColor.brighter());
     }
 
     public void setClient(Client client) {

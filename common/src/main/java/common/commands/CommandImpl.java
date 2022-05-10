@@ -4,6 +4,8 @@ import common.connection.*;
 import common.data.Worker;
 import common.exceptions.*;
 
+import java.util.HashSet;
+
 /**
  * basic command implementation
  */
@@ -58,8 +60,6 @@ public abstract class CommandImpl implements Command {
     public Response run() throws InvalidDataException, CommandException, FileException, ConnectionException, CollectionException {
         AnswerMsg res = new AnswerMsg();
         res.info(execute());
-        res.setCollectionOperation(operation);
-        if(res.getCollectionOperation()!= CollectionOperation.NONE)res.getCollection().add(getWorkerArg());
         return res;
     }
 

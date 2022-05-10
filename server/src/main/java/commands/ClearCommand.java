@@ -5,6 +5,7 @@ import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
 import common.connection.AnswerMsg;
+import common.connection.CollectionOperation;
 import common.connection.Response;
 import common.exceptions.EmptyCollectionException;
 import common.exceptions.InvalidDataException;
@@ -14,7 +15,7 @@ public class ClearCommand extends CommandImpl {
     private final WorkerDatabaseManager collectionManager;
 
     public ClearCommand(WorkerManager cm) {
-        super("clear", CommandType.NORMAL);
+        super("clear", CommandType.NORMAL, CollectionOperation.REMOVE);
         collectionManager = (WorkerDatabaseManager) cm;
     }
 

@@ -8,8 +8,8 @@ import common.data.Worker;
  */
 public class CommandMsg implements Request {
     private final String commandName;
-    private final String commandStringArgument;
-    private final Worker worker;
+    private String commandStringArgument;
+    private Worker worker;
     private User user;
     private Request.Status status;
 
@@ -52,6 +52,16 @@ public class CommandMsg implements Request {
 
     public CommandMsg setUser(User usr) {
         user = usr;
+        return this;
+    }
+
+    public CommandMsg setWorker(Worker w){
+        worker = w;
+        return this;
+    }
+
+    public CommandMsg setArgument(String s){
+        commandStringArgument = s;
         return this;
     }
 

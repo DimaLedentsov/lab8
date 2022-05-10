@@ -77,7 +77,7 @@ public class AskWindowController {
 
     public String readName() throws EmptyStringException {
         String s = nameField.getText();
-        if (s.equals("")) {
+        if (s==null||s.equals("")) {
             throw new EmptyStringException();
         }
         return s;
@@ -85,7 +85,7 @@ public class AskWindowController {
 
     public String readFullName() {
         String s = organizationNameField.getText();
-        if (s.equals("")) {
+        if (s==null||s.equals("")) {
             return null;
         }
         return s;
@@ -163,9 +163,20 @@ public class AskWindowController {
     public Worker readWorker() throws InvalidDataException {
         askStage.showAndWait();
 
-
+        //if(worker==null) throw new InvalidDataException("");
         return worker;
 
+    }
+    public void setWorker(Worker worker) {
+        nameField.setText(worker.getName());
+        coordinatesXField.setText(worker.getCoordinates().getX() + "");
+        coordinatesYField.setText(worker.getCoordinates().getY() + "");
+        salaryField.setText(worker.getSalary() + "");
+        organizationNameField.setText(worker.getOrganization().getFullName());
+        endDateField.setText(worker.getEndDate() + "");
+        positionBox.setValue(worker.getPosition());
+        statusBox.setValue(worker.getStatus());
+        organizationTypeBox.setValue(worker.getOrganization().getType());
     }
     @FXML
     private void enterButtonOnAction() {
@@ -181,7 +192,6 @@ public class AskWindowController {
             worker = new DefaultWorker(name, coords, salary, date, pos, stat, org);
 
             askStage.close();
-            if(worker==null) throw  new InvalidDataException("empty worker");
         } catch (InvalidDataException|IllegalArgumentException exception) {
             new OutputterUI().error(exception.getMessage());
         }

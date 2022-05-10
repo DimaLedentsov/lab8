@@ -168,7 +168,7 @@ public class Worker implements Collectionable, Serializable {
         if (position != null) s += "  \"position\" : " + "\"" + position + "\"" + ",\n";
         s += "  \"status\" : " + "\"" + status.toString() + "\"" + ",\n";
         s += "  \"organization\" : " + organization.toString() + ",\n";
-        if (userLogin != null) s += "  \"userLogin\" : " + "\"" +organization.toString() + "\"" + ",\n";
+        if (userLogin != null) s += "  \"userLogin\" : " + "\"" +userLogin + "\"" + ",\n";
         s += "}";
         return s;
     }

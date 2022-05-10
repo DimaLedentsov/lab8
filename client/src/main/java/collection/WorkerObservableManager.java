@@ -10,19 +10,27 @@ import javafx.collections.ObservableList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Worker>> {
     private ObservableList<Worker> collection;
+    private Set<Integer> uniqueIds;
     public WorkerObservableManager(){
-        collection = FXCollections.emptyObservableList();
+        collection = FXCollections.observableArrayList();
+        uniqueIds = ConcurrentHashMap.newKeySet();
     }
 
+    public Set<Integer> getUniqueIds(){
+        return uniqueIds;
+    }
     public void applyChanges(Response response){
         CollectionOperation op = response.getCollectionOperation();
         Collection<Worker> changes = response.getCollection();
         if(op==CollectionOperation.ADD){
             for(Worker worker: changes){
-                super.add(worker);
+                super.addWithoutIdGeneration(worker);
             }
         }
         if(op==CollectionOperation.REMOVE){
@@ -36,7 +44,7 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
             }
         }
     }
-    public ObservableList getCollection(){
+    public ObservableList<Worker> getCollection(){
         return collection;
     }
 }
