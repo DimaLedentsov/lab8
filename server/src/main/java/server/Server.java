@@ -172,6 +172,11 @@ public class Server extends Thread implements SenderReceiver {
                 responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
                 return;
             }
+            if(request.getStatus()==Request.Status.CONNECTION_TEST){
+                answerMsg.setStatus(Response.Status.FINE);
+                responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
+                return;
+            }
             Worker worker = request.getWorker();
 
             if (worker != null) {

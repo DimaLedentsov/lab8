@@ -23,6 +23,7 @@ public interface Request extends Serializable {
     enum Status {
         DEFAULT,
         HELLO,
+        CONNECTION_TEST,
         EXIT,
         SENT_FROM_CLIENT,
         RECEIVED_BY_SERVER

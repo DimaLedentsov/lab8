@@ -1,15 +1,16 @@
 package main;
 
 
-import java.io.PrintStream;
 import java.util.ResourceBundle;
 
 import client.Client;
-import common.data.Worker;
+import common.connection.CommandMsg;
+import common.connection.Request;
 import common.exceptions.*;
 import controllers.AskWindowController;
 import controllers.LoginWindowController;
 import controllers.MainWindowController;
+import io.OutputterUI;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,13 +18,15 @@ import javafx.scene.Scene;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import controllers.tools.*;
-import static common.io.OutputManager.*;
+import org.google.jhsheets.filtered.FilteredTableView;
+
+import static common.io.ConsoleOutputter.*;
 
 
 public class App extends Application {
     //public static Logger logger = LogManager.getLogger("logger");
     //static final Logger logger = LogManager.getRootLogger();
-    private static final String APP_TITLE = "Collection Keeper";
+    private static final String APP_TITLE = "Worker Manager";
     public static final String BUNDLE = "bundles.gui";
     private Stage primaryStage;
     static Client client;
@@ -80,7 +83,9 @@ public class App extends Application {
 
         try {
             client = new Client(address,port);
-            client.start();
+            client.setOutputManager(new OutputterUI());
+            client.connectionTest();
+            //client.start();
         } catch (ConnectionException e) {
             e.printStackTrace();
         }
@@ -104,6 +109,15 @@ public class App extends Application {
             stage.setScene(loginWindowScene);
             stage.setResizable(false);
             stage.show();
+           /* stage.setOnShown((e)->{
+                //if(!stage.isShowing()){
+                    try {
+                        client.send(new CommandMsg().setStatus(Request.Status.HELLO));
+                    } catch (ConnectionException ex) {
+
+                    }
+                //}
+            });*/
 
 
             //setMainWindow();
@@ -149,6 +163,11 @@ public class App extends Application {
             primaryStage.setMinWidth(mainWindowScene.getWidth());
             primaryStage.setMinHeight(mainWindowScene.getHeight());
             primaryStage.setResizable(true);
+            primaryStage.setOnCloseRequest((e)->{
+                print("aa");
+                client.close();
+
+            });
 
 
 
@@ -159,4 +178,5 @@ public class App extends Application {
             exception.printStackTrace();
         }
     }
+
 }

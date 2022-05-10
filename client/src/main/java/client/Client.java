@@ -7,18 +7,17 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.*;
 import java.nio.ByteBuffer;
-import java.util.Collection;
 
 import collection.WorkerObservableManager;
 import commands.ClientCommandManager;
 import common.auth.User;
-import common.collection.WorkerManager;
 import common.connection.*;
-import common.data.Worker;
 import common.exceptions.*;
+import common.io.OutputManager;
+import io.OutputterUI;
 
-import static common.io.OutputManager.print;
-import static common.io.OutputManager.printErr;
+import static common.io.ConsoleOutputter.print;
+import static common.io.ConsoleOutputter.printErr;
 
 /**
  * client class
@@ -26,13 +25,16 @@ import static common.io.OutputManager.printErr;
 public class Client extends Thread implements SenderReceiver {
     private SocketAddress address;
     private DatagramSocket socket;
-    public final int MAX_TIME_OUT = 10000;
+    public final int MAX_TIME_OUT = 500;
     public final int MAX_ATTEMPTS = 3;
     private User user;
     private User attempt;
     private boolean running;
+
     private ClientCommandManager commandManager;
+    private OutputManager outputManager;
     private volatile boolean receivedRequest;
+    private volatile boolean authSuccess;
 
     private boolean connected;
     private WorkerObservableManager collectionManager;
@@ -50,9 +52,10 @@ public class Client extends Thread implements SenderReceiver {
         connect(addr, p);
         running = true;
         connected = false;
+        authSuccess = false;
         commandManager = new ClientCommandManager(this);
         collectionManager = new WorkerObservableManager();
-        setDaemon(true);
+        //setDaemon(true);
         setName("client thread");
     }
 
@@ -103,7 +106,7 @@ public class Client extends Thread implements SenderReceiver {
      * @param request request
      * @throws ConnectionException
      */
-    public synchronized void send(Request request) throws ConnectionException {
+    public void send(Request request) throws ConnectionException {
         try {
             //request.setStatus(Request.Status.SENT_FROM_CLIENT);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(BUFFER_SIZE);
@@ -201,6 +204,7 @@ public class Client extends Thread implements SenderReceiver {
                     case COLLECTION:
                         collectionManager.applyChanges(response);
                         connected = true;
+                        print("loaded!");
                         break;
                     case BROADCAST:
                         //commandManager.condition.await();
@@ -209,7 +213,10 @@ public class Client extends Thread implements SenderReceiver {
                         break;
                     case AUTH_SUCCESS:
                         user = attempt;
+                        authSuccess = true;
                         break;
+                    case ERROR:
+                        outputManager.error(response.getMessage());
                     default:
                         print(response.getMessage());
                         receivedRequest = true;
@@ -224,20 +231,40 @@ public class Client extends Thread implements SenderReceiver {
         }
     }
 
+    public void connectionTest(){
+        connected = false;
+        try {
+            send(new CommandMsg().setStatus(Request.Status.CONNECTION_TEST));
+            Response response = receive();
+
+            connected= (response.getStatus()== Response.Status.FINE);
+        } catch (ConnectionException| InvalidDataException ignored){
+
+        }
+    }
     public void processAuthentication(String login, String password, boolean register){
         attempt = new User(login,password);
         CommandMsg msg = new CommandMsg();
         if(register){
             msg = new CommandMsg("register").setStatus(Request.Status.DEFAULT).setUser(attempt);
-
         }
         else {
             msg = new CommandMsg("login").setStatus(Request.Status.DEFAULT).setUser(attempt);
         }
         try {
             send(msg);
-
-        } catch (ConnectionException e) {
+            Response answer = receive();
+            connected = true;
+            authSuccess = (answer.getStatus() == Response.Status.AUTH_SUCCESS);
+            if (authSuccess) {
+                user = attempt;
+            } else {
+                outputManager.error("wrong passwd");
+            }
+        } catch (ConnectionTimeoutException e){
+            outputManager.error("connection timeout");
+            connected = false;
+        } catch (ConnectionException|InvalidDataException e) {
             connected=false;
         }
     }
@@ -249,10 +276,19 @@ public class Client extends Thread implements SenderReceiver {
         return connected;
     }
 
+    public boolean isAuthSuccess(){
+        return authSuccess;
+    }
     public WorkerObservableManager getWorkerManager(){
         return collectionManager;
     }
     public ClientCommandManager getCommandManager(){return commandManager;}
+    public OutputManager getOutputManager(){
+        return outputManager;
+    }
+    public void setOutputManager(OutputManager out){
+        outputManager = out;
+    }
     /**
      * close client
      */

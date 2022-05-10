@@ -40,10 +40,6 @@ public class LoginWindowController {
      */
     @FXML
     private void signInButtonOnAction() {
-        client.processAuthentication(usernameField.getText(),
-                passwordField.getText(),
-                registerCheckBox.isSelected());
-        app.setMainWindow();
 
         if (!client.isConnected()) {
             isConnectedLabel.textProperty().bind(resourceFactory.getStringBinding("NotConnected"));
@@ -51,6 +47,13 @@ public class LoginWindowController {
         } else {
             isConnectedLabel.textProperty().bind(resourceFactory.getStringBinding("Connected"));
             isConnectedLabel.setTextFill(CONNECTED_COLOR);
+        }
+        client.processAuthentication(usernameField.getText(),
+                passwordField.getText(),
+                registerCheckBox.isSelected());
+        if (client.isAuthSuccess()) {
+            app.setMainWindow();
+            client.start();
         }
     }
 

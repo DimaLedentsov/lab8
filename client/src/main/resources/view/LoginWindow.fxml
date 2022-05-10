@@ -15,7 +15,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="370.8" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginWindowController">
+<AnchorPane prefHeight="370.8" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controllers.LoginWindowController">
     <children>
         <GridPane alignment="CENTER" hgap="10.0" prefHeight="318.0" prefWidth="512.0" vgap="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columnConstraints>
@@ -45,9 +45,9 @@
                 </Label>
                 <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="SOMETIMES" />
                 <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="SOMETIMES" />
-                <ImageView fitHeight="80.0" fitWidth="286.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.vgrow="ALWAYS">
+                <ImageView fitHeight="164.0" fitWidth="507.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.vgrow="ALWAYS">
                     <image>
-                        <Image url="@../img/itmo_logo.png" />
+                        <Image url="@../img/logo.png" />
                     </image>
                 </ImageView>
                 <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" spacing="15.0" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.rowIndex="3" GridPane.vgrow="SOMETIMES">

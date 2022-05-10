@@ -3,14 +3,11 @@ package main;
 import common.exceptions.ConnectionException;
 import common.exceptions.DatabaseException;
 import common.exceptions.InvalidPortException;
-import common.exceptions.InvalidProgramArgumentsException;
 import log.Log;
 import server.*;
 
 import java.io.PrintStream;
 import java.util.Properties;
-
-import static common.io.OutputManager.print;
 
 /**
  * main class for launching server with arguments

@@ -2,7 +2,7 @@ package commands;
 
 import client.Client;
 
-import static common.io.OutputManager.*;
+import static common.io.ConsoleOutputter.*;
 
 import common.exceptions.*;
 import common.commands.*;

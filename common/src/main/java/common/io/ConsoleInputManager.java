@@ -6,7 +6,7 @@ import common.data.*;
 import java.time.LocalDate;
 import java.util.Scanner;
 
-import static common.io.OutputManager.print;
+import static common.io.ConsoleOutputter.print;
 
 public class ConsoleInputManager extends InputManagerImpl {
 

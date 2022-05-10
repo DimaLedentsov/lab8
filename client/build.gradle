@@ -25,7 +25,9 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
+
 
 dependencies {
 
@@ -33,6 +35,10 @@ dependencies {
     implementation 'org.codehaus.groovy:groovy-all:3.0.5'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+    implementation 'com.github.jhsheets:javafx-filterable-table-columns:1.0.1'
+    implementation 'com.github.maimart:TableFilterFX:1.0.0'
+    //implementation group: 'com.panemu', name: 'tiwulfx', version: '2.0'
+
     //implementation group: 'org.controlsfx', name: 'controlsfx', version: '8.40.18'
     implementation project(':common')
     /*/

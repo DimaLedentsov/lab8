@@ -9,7 +9,7 @@ import common.io.InputManager;
 import java.io.Closeable;
 import java.util.*;
 
-import static common.io.OutputManager.print;
+import static common.io.ConsoleOutputter.print;
 
 public abstract class CommandManager implements Commandable, Closeable {
     private final Map<String, Command> map;

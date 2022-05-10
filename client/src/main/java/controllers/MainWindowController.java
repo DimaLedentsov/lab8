@@ -2,7 +2,9 @@ package controllers;
 
 
 import common.connection.CommandMsg;
+import common.connection.Request;
 import common.data.*;
+import common.exceptions.ConnectionException;
 import common.exceptions.InvalidDataException;
 import javafx.animation.ScaleTransition;
 import javafx.scene.shape.Circle;
@@ -196,6 +198,10 @@ public class MainWindowController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getType()));
         //workerTable.setItems(FXCollections.observableArrayList());
        //s TableFilter<Worker> tableFilter = TableFilter.forTableView(workerTable).apply();
+        /*workerTable.setOnSort((e)->{
+            workerTable.getSortOrder().stream().sorted().collect();
+        });*/
+
     }
 
     /**
@@ -211,12 +217,12 @@ public class MainWindowController {
         nameColumn.textProperty().bind(resourceFactory.getStringBinding("NameColumn"));
         coordinatesXColumn.textProperty().bind(resourceFactory.getStringBinding("CoordinatesXColumn"));
         coordinatesYColumn.textProperty().bind(resourceFactory.getStringBinding("CoordinatesYColumn"));
-        salaryColumn.textProperty().bind(resourceFactory.getStringBinding("HealthColumn"));
-        endDateColumn.textProperty().bind(resourceFactory.getStringBinding("CategoryColumn"));
-        positionColumn.textProperty().bind(resourceFactory.getStringBinding("WeaponColumn"));
-        statusColumn.textProperty().bind(resourceFactory.getStringBinding("MeleeWeaponColumn"));
-        organizationNameColumn.textProperty().bind(resourceFactory.getStringBinding("ChapterNameColumn"));
-        organizationTypeColumn.textProperty().bind(resourceFactory.getStringBinding("ChapterSizeColumn"));
+        salaryColumn.textProperty().bind(resourceFactory.getStringBinding("SalaryColumn"));
+        endDateColumn.textProperty().bind(resourceFactory.getStringBinding("EndDateColumn"));
+        positionColumn.textProperty().bind(resourceFactory.getStringBinding("PositionColumn"));
+        statusColumn.textProperty().bind(resourceFactory.getStringBinding("StatusColumn"));
+        organizationNameColumn.textProperty().bind(resourceFactory.getStringBinding("OrganizationNameColumn"));
+        organizationTypeColumn.textProperty().bind(resourceFactory.getStringBinding("OrganizationTypeColumn"));
 
         tableTab.textProperty().bind(resourceFactory.getStringBinding("TableTab"));
         canvasTab.textProperty().bind(resourceFactory.getStringBinding("CanvasTab"));
