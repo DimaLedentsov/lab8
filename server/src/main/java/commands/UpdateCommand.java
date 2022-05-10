@@ -37,7 +37,7 @@ public class UpdateCommand extends CommandImpl {
             throw new AuthException("you dont have permission, element was created by " + owner);
 
         collectionManager.updateByID(id, getWorkerArg());
-        return new AnswerMsg().info( "element #" + id + " updated").setCollection(Arrays.asList(getWorkerArg()));
+        return new AnswerMsg().info( "element #" + id + " updated").setCollection(Arrays.asList(getWorkerArg())).setCollectionOperation(CollectionOperation.UPDATE);
     }
 
 }

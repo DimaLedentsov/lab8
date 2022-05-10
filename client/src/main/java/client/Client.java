@@ -195,7 +195,7 @@ public class Client extends Thread implements SenderReceiver {
         while (running) {
             try {
                 receivedRequest = false;
-                Response response = receive();
+                Response response = receiveWithoutTimeLimits();
 
                 switch (response.getStatus()) {
                     case COLLECTION:

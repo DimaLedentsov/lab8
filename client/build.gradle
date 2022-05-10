@@ -10,9 +10,10 @@ plugins {
 //apply plugin : 'com.github.johnrengelman.shadow'
 //mainClassName = 'main.App'
 application {
-    mainClass = 'main.App'
-    mainClassName = 'main.App'
+    mainClass = 'main.Main'
+    mainClassName = 'main.Main'
 }
+
 javafx {
     version = "14.0.2"
     modules = ['javafx.controls', 'javafx.fxml',"javafx.base",  "javafx.graphics"]
@@ -52,7 +53,7 @@ run {
 
 jar {
     manifest {
-        attributes "Main-Class": "main.App"
+        attributes "Main-Class": "main.Main"
     }
     /*from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
