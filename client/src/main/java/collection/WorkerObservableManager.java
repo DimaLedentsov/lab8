@@ -4,13 +4,11 @@ import common.collection.WorkerManagerImpl;
 import common.connection.CollectionOperation;
 import common.connection.Response;
 import common.data.Worker;
+import common.exceptions.NoSuchIdException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -28,6 +26,7 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
     public void applyChanges(Response response){
         CollectionOperation op = response.getCollectionOperation();
         Collection<Worker> changes = response.getCollection();
+
         if(op==CollectionOperation.ADD){
             for(Worker worker: changes){
                 super.addWithoutIdGeneration(worker);
@@ -46,5 +45,27 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
     }
     public ObservableList<Worker> getCollection(){
         return collection;
+    }
+    @Override
+    public void updateByID(Integer id, Worker newWorker) {
+        assertNotEmpty();
+       /* ListIterator<Worker> itr = collection.listIterator();
+        while(itr.hasNext()){
+            Worker worker = itr.next();
+            if(worker.getId()==id){
+                itr.remove();
+                newWorker.setId(id);
+                itr.add(newWorker);
+                break;
+            }
+        }
+*/
+        Optional<Worker> worker = getCollection().stream()
+                .filter(w -> w.getId() == id)
+                .findFirst();
+        if (!worker.isPresent()) {
+            throw new NoSuchIdException(id);
+        }
+        Collections.replaceAll(collection,worker.get(),newWorker);
     }
 }

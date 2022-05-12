@@ -3,7 +3,10 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.ContextMenu?>
+<?import javafx.scene.control.CustomMenuItem?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
@@ -23,7 +26,33 @@
                 <AnchorPane prefHeight="180.0" prefWidth="200.0">
                     <TableView fx:id="workerTable" prefHeight="598.0" prefWidth="445.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
-                            <TableColumn fx:id="idColumn" prefWidth="153.0" text="IdColumn" />
+                            <TableColumn fx:id="idColumn" prefWidth="153.0" text="IdColumn">
+                        <contextMenu>
+                           <ContextMenu autoHide="false" consumeAutoHidingEvents="false" hideOnEscape="false">
+                             <items>
+                                 <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                                   <content>
+                                     <CheckBox text="Click Me" />
+                                   </content>
+                                 </CustomMenuItem>
+                                 <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                                    <content>
+                                       <CheckBox text="Click Me" />
+                                    </content>
+                                 </CustomMenuItem>
+                                 <CustomMenuItem hideOnClick="false" mnemonicParsing="false" text="Unspecified Action">
+                                    <content>
+                                       <CheckBox text="Click Me" />
+                                    </content>
+                                 </CustomMenuItem>
+                                 <CustomMenuItem mnemonicParsing="false" text="Unspecified Action">
+                                    <content>
+                                       <CheckBox text="Click Me" />
+                                    </content>
+                                 </CustomMenuItem>
+                             </items>
+                           </ContextMenu>
+                        </contextMenu></TableColumn>
                             <TableColumn fx:id="ownerColumn" prefWidth="47.0" text="OwnerColumn" />
                             <TableColumn fx:id="creationDateColumn" prefWidth="125.0" text="CreationDateColumn" />
                             <TableColumn fx:id="nameColumn" prefWidth="100.0" text="NameColumn" />

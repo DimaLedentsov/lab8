@@ -153,11 +153,15 @@ public class App extends Application {
             askWindowController.initLangs(resourceFactory);
 
             mainWindowController.setClient(client);
-            mainWindowController.setUsername("aa");//client.getUser().getLogin());
+            //mainWindowController.setUsername("aa");//client.getUser().getLogin());
+            mainWindowController.setUsername(client.getUser()!=null?client.getUser().getLogin():"");
             mainWindowController.setAskStage(askStage);
             mainWindowController.setPrimaryStage(primaryStage);
             mainWindowController.setAskWindowController(askWindowController);
             mainWindowController.refreshButtonOnAction();
+            mainWindowController.initFilter();
+
+
 
             primaryStage.setScene(mainWindowScene);
             primaryStage.setMinWidth(mainWindowScene.getWidth());
@@ -168,6 +172,7 @@ public class App extends Application {
                 client.close();
 
             });
+
 
 
 

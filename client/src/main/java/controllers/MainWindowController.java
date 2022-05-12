@@ -6,6 +6,7 @@ import common.connection.Request;
 import common.data.*;
 import common.exceptions.ConnectionException;
 import common.exceptions.InvalidDataException;
+import controllers.tools.TableFilter;
 import javafx.animation.ScaleTransition;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -25,6 +26,8 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.google.jhsheets.filtered.FilteredTableView;
+import org.google.jhsheets.filtered.tablecolumn.*;
 //import org.controlsfx.control.table.TableFilter;
 
 import java.io.File;
@@ -134,7 +137,7 @@ public class MainWindowController {
     private ComboBox<String> languageComboBox;
     @FXML
     private Label usernameLabel;
-
+    @FXML
     private Client client;
     private Stage askStage;
     private Stage primaryStage;
@@ -172,6 +175,7 @@ public class MainWindowController {
      * Initialize table.
      */
     private void initializeTable() {
+
         idColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getId()));
         ownerColumn.setCellValueFactory(cellData ->
@@ -201,9 +205,17 @@ public class MainWindowController {
         /*workerTable.setOnSort((e)->{
             workerTable.getSortOrder().stream().sorted().collect();
         });*/
+        //FilteredTableView y;
 
     }
 
+    public void initFilter(){
+
+        new TableFilter<Worker>(workerTable,client.getWorkerManager().getCollection(),resourceFactory)
+                .addFilter(idColumn, (w)->Integer.toString(w.getId()))
+                .addFilter(nameColumn, (w)->w.getName());
+
+    }
     /**
      * Bind gui language.
      */
@@ -300,6 +312,7 @@ public class MainWindowController {
         workerTable.getItems().add(worker);
 */
         Worker worker = workerTable.getSelectionModel().getSelectedItem();
+        //int i = workerTable.getSelectionModel().getSelectedIndex();
         if(worker!=null) {
             askWindowController.setWorker(worker);
             try {
@@ -309,6 +322,8 @@ public class MainWindowController {
             }
         }
         workerTable.refresh();
+        //workerTable.getSelectionModel().set
+
         refreshCanvas();
 
         /*if (!spaceMarineTable.getSelectionModel().isEmpty()) {

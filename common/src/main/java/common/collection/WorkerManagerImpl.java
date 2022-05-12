@@ -147,6 +147,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
         getCollection().remove(worker.get());
         newWorker.setId(id);
         getCollection().add(newWorker);
+
     }
 
     /**

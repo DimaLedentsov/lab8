@@ -82,6 +82,10 @@ public class LoginWindowController {
         this.client = client;
     }
 
+    public void setUsername(String username) {
+        usernameLabel.setText(username);
+    }
+
     public void initLangs(ObservableResourceFactory r) {
         resourceFactory = r;
         bindGuiLanguage();
