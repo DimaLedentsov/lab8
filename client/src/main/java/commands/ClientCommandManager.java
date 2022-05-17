@@ -5,6 +5,7 @@ import client.Client;
 import static common.io.ConsoleOutputter.*;
 
 import common.exceptions.*;
+import commands.*;
 import common.commands.*;
 import common.connection.*;
 
@@ -25,7 +26,8 @@ public class ClientCommandManager extends CommandManager {
         addCommand(new ExitCommand());
         addCommand(new HelpCommand());
         addCommand(new PrintUniqueSalaryCommand(client.getWorkerManager()));
-        addCommand(new GroupCountingByEndDateCommand(client.getWorkerManager()));
+        addCommand(new GroupCountingByEndDateCommand(client));
+        addCommand(new FilterStartsWithNameCommand(client.getWorkerManager()));
     }
 
     public Client getClient() {

@@ -72,4 +72,7 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
     public void setController(MainWindowController c){
         controller = c;
     }
+    public MainWindowController getController(){
+        return controller;
+    }
 }

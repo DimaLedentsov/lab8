@@ -14,6 +14,7 @@ import common.auth.User;
 import common.connection.*;
 import common.exceptions.*;
 import common.io.OutputManager;
+import controllers.tools.ObservableResourceFactory;
 import io.OutputterUI;
 
 import static common.io.ConsoleOutputter.print;
@@ -38,6 +39,7 @@ public class Client extends Thread implements SenderReceiver {
 
     private boolean connected;
     private WorkerObservableManager collectionManager;
+    private ObservableResourceFactory resourceFactory;
     public boolean isReceivedRequest(){
         return receivedRequest;
     }
@@ -288,6 +290,12 @@ public class Client extends Thread implements SenderReceiver {
     }
     public void setOutputManager(OutputManager out){
         outputManager = out;
+    }
+    public ObservableResourceFactory getResourceFactory(){
+        return resourceFactory;
+    }
+    public void setResourceFactory(ObservableResourceFactory rf){
+        resourceFactory = rf;
     }
     /**
      * close client

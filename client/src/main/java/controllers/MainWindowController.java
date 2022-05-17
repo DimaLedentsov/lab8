@@ -11,9 +11,12 @@ import controllers.tools.TableFilter;
 import controllers.tools.ZoomOperator;
 import javafx.animation.ScaleTransition;
 import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.stage.StageStyle;
 import main.App;
 import client.Client;
 import controllers.tools.ObservableResourceFactory;
@@ -145,7 +148,8 @@ public class MainWindowController {
     private ComboBox<String> languageComboBox;
     @FXML
     private Label usernameLabel;
-    @FXML
+
+    private TableFilter<Worker> tableFilter;
     private Client client;
     private Stage askStage;
     private Stage primaryStage;
@@ -219,7 +223,7 @@ public class MainWindowController {
     }
 
     public void initFilter(){
-        new TableFilter<Worker>(workerTable,client.getWorkerManager().getCollection(),resourceFactory)
+        tableFilter = new TableFilter<Worker>(workerTable,client.getWorkerManager().getCollection(),resourceFactory)
                 .addFilter(idColumn, (w)->Integer.toString(w.getId()))
                 .addFilter(nameColumn, (w)->w.getName())
                 .addFilter(coordinatesXColumn, (w)->Float.toString(w.getCoordinates().getX()))
@@ -232,6 +236,13 @@ public class MainWindowController {
                 .addFilter(organizationNameColumn, (w)->w.getOrganization().getFullName())
                 .addFilter(organizationTypeColumn, (w)->w.getOrganization().getType().toString())
                 .addFilter(ownerColumn, (w)->w.getUserLogin());
+    }
+
+    public TableFilter<Worker> getFilter(){
+        return tableFilter;
+    }
+    public TableColumn<Worker,?> getNameColumn(){
+        return nameColumn;
     }
 
     private void initCanvas(){
@@ -296,6 +307,7 @@ public class MainWindowController {
         clearButton.textProperty().bind(resourceFactory.getStringBinding("ClearButton"));
         executeScriptButton.textProperty().bind(resourceFactory.getStringBinding("ExecuteScriptButton"));
         addIfMinButton.textProperty().bind(resourceFactory.getStringBinding("AddIfMinButton"));
+        addIfMaxButton.textProperty().bind(resourceFactory.getStringBinding("AddIfMaxButton"));
         groupByEndDateButton.textProperty().bind(resourceFactory.getStringBinding("GroupByEndDateButton"));
         filterStartsWithNameButton.textProperty().bind(resourceFactory.getStringBinding("FilterStartsWithNameButton"));
         printUniqueSalariesButton.textProperty().bind(resourceFactory.getStringBinding("PrintUniqueSalariesButton"));
@@ -477,7 +489,15 @@ public class MainWindowController {
      */
     @FXML
     private void filterStartsWithNameButtonOnAction() {
-        client.getCommandManager().runCommand(new CommandMsg("print_unique_salary"));
+        Label startsWithLabel = new Label();
+
+        VBox vBox = new VBox();
+
+        Stage stage = new Stage();
+        //Scene scene = new Scene(listView);
+        //stage.setScene(scene);
+        stage.showAndWait();
+        client.getCommandManager().runCommand(new CommandMsg("filter_starts_with_name").setArgument(""));
 
     }
     @FXML
@@ -532,6 +552,8 @@ public class MainWindowController {
             circleObject.translateXProperty().bind(canvasPane.widthProperty().divide(2).add(worker.getCoordinates().getX()));
             circleObject.translateYProperty().bind(canvasPane.heightProperty().divide(2).subtract(worker.getCoordinates().getY()));
 
+            circleObject.setOpacity(0.5);
+
             Text textObject = new Text(Integer.toString(worker.getId()));
             textObject.setOnMouseClicked(circleObject::fireEvent);
             textObject.setFont(Font.font(size / 3));
@@ -583,6 +605,7 @@ public class MainWindowController {
         this.client = client;
         workerTable.setItems(client.getWorkerManager().getCollection());
         client.getWorkerManager().setController(this);
+        client.setResourceFactory(resourceFactory);
     }
 
     public void setUsername(String username) {
