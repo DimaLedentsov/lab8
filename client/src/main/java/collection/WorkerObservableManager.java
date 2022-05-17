@@ -5,8 +5,11 @@ import common.connection.CollectionOperation;
 import common.connection.Response;
 import common.data.Worker;
 import common.exceptions.NoSuchIdException;
+import controllers.MainWindowController;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.TableView;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -15,6 +18,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Worker>> {
     private ObservableList<Worker> collection;
     private Set<Integer> uniqueIds;
+    private MainWindowController controller;
     public WorkerObservableManager(){
         collection = FXCollections.observableArrayList();
         uniqueIds = ConcurrentHashMap.newKeySet();
@@ -42,6 +46,13 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
                 super.updateByID(worker.getId(),worker);
             }
         }
+        if(controller!=null && op!=CollectionOperation.NONE){
+            Platform.runLater(()->{
+                controller.refreshCanvas();
+                controller.refreshTable();
+            });
+        }
+
     }
     public ObservableList<Worker> getCollection(){
         return collection;
@@ -49,17 +60,6 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
     @Override
     public void updateByID(Integer id, Worker newWorker) {
         assertNotEmpty();
-       /* ListIterator<Worker> itr = collection.listIterator();
-        while(itr.hasNext()){
-            Worker worker = itr.next();
-            if(worker.getId()==id){
-                itr.remove();
-                newWorker.setId(id);
-                itr.add(newWorker);
-                break;
-            }
-        }
-*/
         Optional<Worker> worker = getCollection().stream()
                 .filter(w -> w.getId() == id)
                 .findFirst();
@@ -67,5 +67,9 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
             throw new NoSuchIdException(id);
         }
         Collections.replaceAll(collection,worker.get(),newWorker);
+    }
+
+    public void setController(MainWindowController c){
+        controller = c;
     }
 }

@@ -23,7 +23,7 @@ public class DateConverter {
      * @return
      */
     public static String dateToString(Date date) {
-        return dateFormatter.format(date);
+        return date!=null?dateFormatter.format(date):null;
     }
 
     /**
@@ -33,7 +33,7 @@ public class DateConverter {
      * @return
      */
     public static String dateToString(LocalDate date) {
-        return date.format(localDateFormatter);
+        return date!=null?date.format(localDateFormatter):null;
     }
 
     /**

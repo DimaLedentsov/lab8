@@ -6,8 +6,12 @@ import common.connection.Request;
 import common.data.*;
 import common.exceptions.ConnectionException;
 import common.exceptions.InvalidDataException;
+import common.utils.DateConverter;
 import controllers.tools.TableFilter;
+import controllers.tools.ZoomOperator;
 import javafx.animation.ScaleTransition;
+import javafx.event.EventHandler;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
 import main.App;
@@ -104,13 +108,17 @@ public class MainWindowController {
     @FXML
     private Button addIfMinButton;
     @FXML
-    private Button removeGreaterButton;
+    private Button addIfMaxButton;
     @FXML
-    private Button historyButton;
+    private Button filterStartsWithNameButton;
     @FXML
-    private Button sumOfHealthButton;
+    private Button groupByEndDateButton;
+    @FXML
+    private Button printUniqueSalariesButton;
     @FXML
     private Button refreshButton;
+    @FXML
+    private Button helpButton;
     @FXML
     private Tooltip infoButtonTooltip;
     @FXML
@@ -157,6 +165,7 @@ public class MainWindowController {
      */
     public void initialize() {
         initializeTable();
+        initCanvas();
         fileChooser = new FileChooser();
         fileChooser.setInitialDirectory(new File("."));
         userColorMap = new HashMap<>();
@@ -210,11 +219,52 @@ public class MainWindowController {
     }
 
     public void initFilter(){
-
         new TableFilter<Worker>(workerTable,client.getWorkerManager().getCollection(),resourceFactory)
                 .addFilter(idColumn, (w)->Integer.toString(w.getId()))
-                .addFilter(nameColumn, (w)->w.getName());
+                .addFilter(nameColumn, (w)->w.getName())
+                .addFilter(coordinatesXColumn, (w)->Float.toString(w.getCoordinates().getX()))
+                .addFilter(coordinatesYColumn, (w)->Long.toString(w.getCoordinates().getY()))
+                .addFilter(creationDateColumn, (w)-> DateConverter.dateToString(w.getCreationDate()))
+                .addFilter(endDateColumn, (w)->DateConverter.dateToString(w.getEndDate()))
+                .addFilter(positionColumn, (w)->w.getPosition().toString())
+                .addFilter(statusColumn, (w)->w.getStatus().toString())
+                .addFilter(salaryColumn, (w)->Long.toString(w.getSalary()))
+                .addFilter(organizationNameColumn, (w)->w.getOrganization().getFullName())
+                .addFilter(organizationTypeColumn, (w)->w.getOrganization().getType().toString())
+                .addFilter(ownerColumn, (w)->w.getUserLogin());
+    }
 
+    private void initCanvas(){
+        ZoomOperator zoomOperator = new ZoomOperator();
+
+// Listen to scroll events (similarly you could listen to a button click, slider, ...)
+        canvasPane.setOnScroll(new EventHandler<ScrollEvent>() {
+            @Override
+            public void handle(ScrollEvent event) {
+                double zoomFactor = 1.5;
+                if (event.getDeltaY() <= 0) {
+                    // zoom out
+                    zoomFactor = 1 / zoomFactor;
+
+                }
+
+                double x = event.getSceneX();
+                double y = event.getSceneY();
+
+                //if(!(event.getDeltaY()<=0 && (zoomOperator.getBounds().getHeight()<=1000||zoomOperator.getBounds().getWidth()<=1000))){
+                /*if((event.getDeltaY()<=0 && (zoomOperator.getBounds().getMinX()>=1000||
+                        zoomOperator.getBounds().getMinY()>=1000||
+                        zoomOperator.getBounds().getMaxX()<=2000-1000||
+                        zoomOperator.getBounds().getMaxY()<=2000-1000))) return;*/
+                if((event.getDeltaY()<=0 && (zoomOperator.getBounds().getHeight()<=500||zoomOperator.getBounds().getWidth()<=500))) return;
+                zoomOperator.zoom(canvasPane, zoomFactor, x, y);
+
+
+            }
+        });
+
+        canvasPane.setMinWidth(2000);
+        canvasPane.setMinHeight(2000);
     }
     /**
      * Bind gui language.
@@ -246,10 +296,11 @@ public class MainWindowController {
         clearButton.textProperty().bind(resourceFactory.getStringBinding("ClearButton"));
         executeScriptButton.textProperty().bind(resourceFactory.getStringBinding("ExecuteScriptButton"));
         addIfMinButton.textProperty().bind(resourceFactory.getStringBinding("AddIfMinButton"));
-        removeGreaterButton.textProperty().bind(resourceFactory.getStringBinding("RemoveGreaterButton"));
-        historyButton.textProperty().bind(resourceFactory.getStringBinding("HistoryButton"));
-        sumOfHealthButton.textProperty().bind(resourceFactory.getStringBinding("SumOfHealthButton"));
+        groupByEndDateButton.textProperty().bind(resourceFactory.getStringBinding("GroupByEndDateButton"));
+        filterStartsWithNameButton.textProperty().bind(resourceFactory.getStringBinding("FilterStartsWithNameButton"));
+        printUniqueSalariesButton.textProperty().bind(resourceFactory.getStringBinding("PrintUniqueSalariesButton"));
         refreshButton.textProperty().bind(resourceFactory.getStringBinding("RefreshButton"));
+        helpButton.textProperty().bind(resourceFactory.getStringBinding("HelpButton"));
 
         infoButtonTooltip.textProperty().bind(resourceFactory.getStringBinding("InfoButtonTooltip"));
         addButtonTooltip.textProperty().bind(resourceFactory.getStringBinding("AddButtonTooltip"));
@@ -280,22 +331,6 @@ public class MainWindowController {
         requestAction(INFO_COMMAND_NAME);
     }
 
-    /**
-     * Add button on action.
-     */
-    @FXML
-    private void addButtonOnAction() {
-        //askWindowController.clearMarine();
-
-        try {
-            client.getCommandManager().runCommand(new CommandMsg("add").setWorker(askWindowController.readWorker()));
-        } catch (InvalidDataException e) {
-
-        }
-        workerTable.refresh();
-        refreshCanvas();
-        //if (marineRaw != null) requestAction(ADD_COMMAND_NAME, "", marineRaw);*/
-    }
 
     /**
      * Update button on action.
@@ -312,6 +347,7 @@ public class MainWindowController {
         workerTable.getItems().add(worker);
 */
         Worker worker = workerTable.getSelectionModel().getSelectedItem();
+       // int idx = workerTable.getSelectionModel().getSelectedIndex() + 1;
         //int i = workerTable.getSelectionModel().getSelectedIndex();
         if(worker!=null) {
             askWindowController.setWorker(worker);
@@ -371,50 +407,82 @@ public class MainWindowController {
     }
 
     /**
+     * Add button on action.
+     */
+    @FXML
+    private void addButtonOnAction() {
+        //askWindowController.clearMarine();
+
+        try {
+            client.getCommandManager().runCommand(new CommandMsg("add").setWorker(askWindowController.readWorker()));
+        } catch (InvalidDataException e) {
+
+        }
+        /*workerTable.refresh();
+        refreshCanvas();*/
+        //if (marineRaw != null) requestAction(ADD_COMMAND_NAME, "", marineRaw);*/
+    }
+    /**
      * Add if min button on action.
      */
     @FXML
     private void addIfMinButtonOnAction() {
-        /*askWindowController.clearMarine();
-        askStage.showAndWait();
-        MarineRaw marineRaw = askWindowController.getAndClear();
-        if (marineRaw != null) requestAction(ADD_IF_MIN_COMMAND_NAME, "", marineRaw);*/
+        try {
+            Worker worker = askWindowController.readWorker();
+            if(worker!=null) {
+                client.getCommandManager().runCommand(new CommandMsg("add_if_min").setWorker(worker));
+                /*workerTable.refresh();
+                refreshCanvas();*/
+            }
+        } catch (InvalidDataException e) {
+
+        }
+
     }
+
+    @FXML
+    private void addIfMaxButtonOnAction() {
+        try {
+            Worker worker = askWindowController.readWorker();
+            if(worker!=null) {
+                client.getCommandManager().runCommand(new CommandMsg("add_if_max").setWorker(worker));
+                /*workerTable.refresh();
+                refreshCanvas();*/
+            }
+        } catch (InvalidDataException e) {
+
+        }
+    }
+
 
     /**
      * Remove greater button on action.
      */
     @FXML
-    private void removeGreaterButtonOnAction() {
-        /*if (!spaceMarineTable.getSelectionModel().isEmpty()) {
-            SpaceMarine marineFromTable = spaceMarineTable.getSelectionModel().getSelectedItem();
-            MarineRaw marineRaw = new MarineRaw(
-                    marineFromTable.getName(),
-                    marineFromTable.getCoordinates(),
-                    marineFromTable.getHealth(),
-                    marineFromTable.getCategory(),
-                    marineFromTable.getWeaponType(),
-                    marineFromTable.getMeleeWeapon(),
-                    marineFromTable.getChapter()
-            );
-            requestAction(REMOVE_GREATER_COMMAND_NAME, "", marineRaw);
-        } else OutputterUI.error("RemoveGreaterButtonSelectionException");*/
+    private void groupByEndDateButtonOnAction() {
+        client.getCommandManager().runCommand(new CommandMsg("group_counting_by_end_date"));
     }
 
     /**
      * History button on action.
      */
     @FXML
-    private void historyButtonOnAction() {
-        requestAction(HISTORY_COMMAND_NAME);
+    private void printUniqueSalariesButtonOnAction() {
+        client.getCommandManager().runCommand(new CommandMsg("print_unique_salary"));
+
     }
 
     /**
      * Sum of health button on action.
      */
     @FXML
-    private void sumOfHealthButtonOnAction() {
-        requestAction(SUM_OF_HEALTH_COMMAND_NAME);
+    private void filterStartsWithNameButtonOnAction() {
+        client.getCommandManager().runCommand(new CommandMsg("print_unique_salary"));
+
+    }
+    @FXML
+    private void helpButtonOnAction(){
+        client.getCommandManager().runCommand(new CommandMsg("help"));
     }
 
     /**
@@ -439,10 +507,15 @@ public class MainWindowController {
         requestAction(commandName, "", null);
     }
 
+
+    public void refreshTable(){
+        workerTable.refresh();
+    }
     /**
      * Refreshes canvas.
      */
-    private void refreshCanvas() {
+
+    public void refreshCanvas() {
         shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
         shapeMap.clear();
         textMap.values().forEach(s -> canvasPane.getChildren().remove(s));
@@ -452,7 +525,7 @@ public class MainWindowController {
                 userColorMap.put(worker.getUserLogin(),
                         Color.color(randomGenerator.nextDouble(), randomGenerator.nextDouble(), randomGenerator.nextDouble()));
 
-            double size = Math.min(worker.getSalary(), MAX_SIZE);
+            double size = Math.min(worker.getSalary()/1000, MAX_SIZE);
 
             Shape circleObject = new Circle(size, userColorMap.get(worker.getUserLogin()));
             circleObject.setOnMouseClicked(this::shapeOnMouseClicked);
@@ -509,6 +582,7 @@ public class MainWindowController {
     public void setClient(Client client) {
         this.client = client;
         workerTable.setItems(client.getWorkerManager().getCollection());
+        client.getWorkerManager().setController(this);
     }
 
     public void setUsername(String username) {

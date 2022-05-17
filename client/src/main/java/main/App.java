@@ -170,7 +170,6 @@ public class App extends Application {
             primaryStage.setOnCloseRequest((e)->{
                 print("aa");
                 client.close();
-
             });
 
 

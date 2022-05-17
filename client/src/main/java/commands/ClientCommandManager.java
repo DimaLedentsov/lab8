@@ -24,6 +24,8 @@ public class ClientCommandManager extends CommandManager {
         addCommand(new ExecuteScriptCommand(this));
         addCommand(new ExitCommand());
         addCommand(new HelpCommand());
+        addCommand(new PrintUniqueSalaryCommand(client.getWorkerManager()));
+        addCommand(new GroupCountingByEndDateCommand(client.getWorkerManager()));
     }
 
     public Client getClient() {

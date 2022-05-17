@@ -163,7 +163,7 @@ public class Server extends Thread implements SenderReceiver {
 
             if(request.getStatus()==Request.Status.EXIT){
                 activeClients.remove(address);
-                Log.logger.info("client " + address.toString() + "shut down");
+                Log.logger.info("client " + address.toString() + " shut down");
                 return;
             }
             if(request.getStatus()==Request.Status.HELLO){

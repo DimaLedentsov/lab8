@@ -5,6 +5,7 @@ import common.connection.CommandMsg;
 import common.data.*;
 import common.exceptions.*;
 import common.io.InputManager;
+import common.utils.DateConverter;
 import controllers.tools.ObservableResourceFactory;
 import io.OutputterUI;
 import javafx.collections.FXCollections;
@@ -172,8 +173,8 @@ public class AskWindowController {
         coordinatesXField.setText(worker.getCoordinates().getX() + "");
         coordinatesYField.setText(worker.getCoordinates().getY() + "");
         salaryField.setText(worker.getSalary() + "");
-        organizationNameField.setText(worker.getOrganization().getFullName());
-        endDateField.setText(worker.getEndDate() + "");
+        organizationNameField.setText(worker.getOrganization().getFullName()!=null?worker.getOrganization().getFullName():"");
+        endDateField.setText(worker.getEndDate()!=null? DateConverter.dateToString(worker.getEndDate()):"");
         positionBox.setValue(worker.getPosition());
         statusBox.setValue(worker.getStatus());
         organizationTypeBox.setValue(worker.getOrganization().getType());
@@ -250,6 +251,19 @@ public class AskWindowController {
      */
     public void initLangs(ObservableResourceFactory resourceFactory) {
         this.resourceFactory = resourceFactory;
-       // bindGuiLanguage();
+        bindGuiLanguage();
+    }
+
+    public void bindGuiLanguage(){
+        nameLabel.textProperty().bind(resourceFactory.getStringBinding("NameColumn"));
+        coordinatesXLabel.textProperty().bind(resourceFactory.getStringBinding("CoordinatesXColumn"));
+        coordinatesYLabel.textProperty().bind(resourceFactory.getStringBinding("CoordinatesYColumn"));
+        endDateLabel.textProperty().bind(resourceFactory.getStringBinding("EndDateColumn"));
+        positionLabel.textProperty().bind(resourceFactory.getStringBinding("PositionColumn"));
+        statusLabel.textProperty().bind(resourceFactory.getStringBinding("StatusColumn"));
+        organizationNameLabel.textProperty().bind(resourceFactory.getStringBinding("OrganizationNameColumn"));
+        organizationTypeLabel.textProperty().bind(resourceFactory.getStringBinding("OrganizationTypeColumn"));
+        salaryLabel.textProperty().bind(resourceFactory.getStringBinding("SalaryColumn"));
+        enterButton.textProperty().bind(resourceFactory.getStringBinding("EnterButton"));
     }
 }

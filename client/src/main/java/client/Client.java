@@ -53,8 +53,8 @@ public class Client extends Thread implements SenderReceiver {
         running = true;
         connected = false;
         authSuccess = false;
-        commandManager = new ClientCommandManager(this);
         collectionManager = new WorkerObservableManager();
+        commandManager = new ClientCommandManager(this);
         //setDaemon(true);
         setName("client thread");
     }
