@@ -55,4 +55,7 @@ public class ObservableResourceFactory {
             }
         };
     }
+    public String getString(String key){
+        return getResources().getString(key);
+    }
 }

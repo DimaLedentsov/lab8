@@ -15,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import main.App;
 
 import java.time.LocalDate;
 import java.util.Scanner;
@@ -67,7 +68,7 @@ public class AskWindowController {
     private Worker resultWorker;
     private ObservableResourceFactory resourceFactory;
     private Worker worker;
-
+    private App app;
     @FXML
     public void initialize() {
         askStage = new Stage();
@@ -76,10 +77,10 @@ public class AskWindowController {
         organizationTypeBox.setItems(FXCollections.observableArrayList(OrganizationType.values()));
     }
 
-    public String readName() throws EmptyStringException {
+    public String readName() throws InvalidDataException {
         String s = nameField.getText();
         if (s==null||s.equals("")) {
-            throw new EmptyStringException();
+            throw new InvalidDataException("NameEmptyException");
         }
         return s;
     }
@@ -92,54 +93,58 @@ public class AskWindowController {
         return s;
     }
 
-    public float readXCoord() throws InvalidNumberException {
+    public float readXCoord() throws InvalidDataException {
         float x;
         try {
             x = Float.parseFloat(coordinatesXField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidDataException("XCoordFormatException");
         }
-        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidNumberException("invalid float value");
+        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidDataException("XCoordFormatException");
         return x;
     }
 
-    public Long readYCoord() throws InvalidNumberException {
+    public Long readYCoord() throws InvalidDataException {
         Long y;
         try {
             y = Long.parseLong(coordinatesYField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidDataException("YCoordFormatException");
         }
-        if (y <= -123) throw new InvalidNumberException("must be greater than -123");
+        if (y <= -123) throw new InvalidDataException("YCoordLimitException");
         return y;
     }
 
-    public Coordinates readCoords() throws InvalidNumberException {
+    public Coordinates readCoords() throws InvalidDataException {
         float x = readXCoord();
         Long y = readYCoord();
         Coordinates coord = new Coordinates(x, y);
         return coord;
     }
 
-    public long readSalary() throws InvalidNumberException {
+    public long readSalary() throws InvalidDataException {
         Long s;
         try {
             s = Long.parseLong(salaryField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidDataException("SalaryFormatException");
         }
 
-        if (s <= 0) throw new InvalidNumberException("must be greater than 0");
+        if (s <= 0) throw new InvalidNumberException("SalaryLimitException");
 
         return s;
     }
 
-    public LocalDate readEndDate() throws InvalidDateFormatException {
+    public LocalDate readEndDate() throws InvalidDataException {
         String buf = endDateField.getText();
         if (buf.equals("")) {
             return null;
         } else {
-            return parseLocalDate(buf);
+            try {
+                return parseLocalDate(buf);
+            } catch (InvalidDateFormatException e){
+                throw new InvalidDataException("EndDateFormatException");
+            }
         }
     }
 
@@ -194,7 +199,7 @@ public class AskWindowController {
 
             askStage.close();
         } catch (InvalidDataException|IllegalArgumentException exception) {
-            new OutputterUI().error(exception.getMessage());
+            app.getOutputManager().error(exception.getMessage());
         }
     }
 /*
@@ -242,6 +247,10 @@ public class AskWindowController {
     public void setAskStage(Stage askStage) {
         this.askStage = askStage;
         this.askStage.setOnCloseRequest((e)->worker=null);
+    }
+
+    public void setApp(App app) {
+        this.app = app;
     }
 
     /**

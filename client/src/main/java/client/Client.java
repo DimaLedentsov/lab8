@@ -269,7 +269,7 @@ public class Client extends Thread implements SenderReceiver {
             if (authSuccess) {
                 user = attempt;
             } else {
-                outputManager.error("wrong passwd");
+                outputManager.error("AuthException");
             }
         } catch (ConnectionTimeoutException e){
             outputManager.error("connection timeout");

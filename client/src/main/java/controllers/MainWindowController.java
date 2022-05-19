@@ -213,6 +213,23 @@ public class MainWindowController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getPosition()));
         endDateColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getEndDate()));
+
+        creationDateColumn.setCellFactory(column -> {
+            TableCell<Worker, Date> cell = new TableCell<Worker, Date>() {
+                @Override
+                protected void updateItem(Date item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(empty) {
+                        setText(null);
+                    }
+                    else {
+                        setText(DateConverter.dateToString(item));
+                    }
+                }
+            };
+
+            return cell;
+        });
         organizationNameColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getFullName()));
         organizationTypeColumn.setCellValueFactory(cellData ->

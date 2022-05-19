@@ -33,7 +33,7 @@ public class App extends Application {
     static String address;
     static int port;
     private static ObservableResourceFactory resourceFactory;
-
+    private OutputterUI outputter;
     public static void main(String[] args) {
         resourceFactory = new ObservableResourceFactory();
         resourceFactory.setResources(ResourceBundle.getBundle(BUNDLE));
@@ -80,10 +80,10 @@ public class App extends Application {
     @Override public void init(){
         resourceFactory = new ObservableResourceFactory();
         resourceFactory.setResources(ResourceBundle.getBundle(BUNDLE));
-
+        outputter = new OutputterUI(resourceFactory);
         try {
             client = new Client(address,port);
-            client.setOutputManager(new OutputterUI());
+            client.setOutputManager(outputter);
             client.setResourceFactory(resourceFactory);
             client.connectionTest();
             //client.start();
@@ -152,6 +152,7 @@ public class App extends Application {
             AskWindowController askWindowController = askWindowLoader.getController();
             askWindowController.setAskStage(askStage);
             askWindowController.initLangs(resourceFactory);
+            askWindowController.setApp(this);
 
 
             //mainWindowController.setUsername("aa");//client.getUser().getLogin());
@@ -184,6 +185,10 @@ public class App extends Application {
             System.out.println(exception);
             exception.printStackTrace();
         }
+    }
+
+    public OutputterUI getOutputManager(){
+        return outputter;
     }
 
 }
