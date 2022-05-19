@@ -1,12 +1,17 @@
 package controllers.tools;
 
+import common.data.Position;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
+
+
 
 public class ZoomOperator {
 
@@ -19,6 +24,58 @@ public class ZoomOperator {
         bounds = new BoundingBox(0,0,0,0);
     }
 
+    class Position {
+        double x,y;
+    }
+
+    public void draggable(Node node) {
+        /*final Position pos = new Position();
+
+        //Prompt the user that the node can be clicked
+        node.addEventHandler(MouseEvent.MOUSE_ENTERED, event -> node.setCursor(Cursor.HAND));
+        node.addEventHandler(MouseEvent.MOUSE_EXITED, event -> node.setCursor(Cursor.DEFAULT));
+
+        //Prompt the user that the node can be dragged
+        node.addEventHandler(MouseEvent.MOUSE_PRESSED, event -> {
+            node.setCursor(Cursor.MOVE);
+
+            //When a press event occurs, the location coordinates of the event are cached
+            pos.x = event.getX();
+            pos.y = event.getY();
+        });
+        node.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> node.setCursor(Cursor.DEFAULT));
+
+        //Realize drag and drop function
+        node.addEventHandler(MouseEvent.MOUSE_DRAGGED, event -> {
+            double distanceX = event.getX() - pos.x;
+            double distanceY = event.getY() - pos.y;
+
+            double x = node.getLayoutX() + distanceX;
+            double y = node.getLayoutY() + distanceY;
+            //After calculating X and y, relocate the node to the specified coordinate point (x, y)
+            System.out.println(x);
+            node.relocate(x, y);
+        });*/
+
+        Position mouse = new Position();
+        node.setOnMousePressed(event -> {
+            mouse.x = event.getSceneX() ;
+            mouse.y = event.getSceneY() ;
+            node.setCursor(Cursor.MOVE);
+        });
+
+        node.setOnMouseDragged(event -> {
+            double deltaX = event.getSceneX() - mouse.x ;
+            double deltaY = event.getSceneY() - mouse.y ;
+            node.setTranslateX(node.getTranslateX() + deltaX);
+            node.setTranslateY(node.getTranslateY() + deltaY);
+            mouse.x = event.getSceneX() ;
+            mouse.y = event.getSceneY() ;
+        });
+
+        node.addEventHandler(MouseEvent.MOUSE_RELEASED, event -> node.setCursor(Cursor.DEFAULT));
+
+    }
     public void zoom(Node node, double factor, double x, double y) {
         // determine scale
         double oldScale = node.getScaleX();

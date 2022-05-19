@@ -10,9 +10,12 @@ import common.utils.DateConverter;
 import controllers.tools.TableFilter;
 import controllers.tools.ZoomOperator;
 import javafx.animation.ScaleTransition;
+import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
@@ -149,6 +152,7 @@ public class MainWindowController {
     @FXML
     private Label usernameLabel;
 
+    private Tooltip shapeTooltip;
     private TableFilter<Worker> tableFilter;
     private Client client;
     private Stage askStage;
@@ -273,7 +277,14 @@ public class MainWindowController {
 
             }
         });
+        /*canvasPane.setOnMouseDragged(event -> {
+            canvasPane.setManaged(false);
+            canvasPane.setTranslateX(event.getX() + canvasPane.getTranslateX());
+            canvasPane.setTranslateY(event.getY() + canvasPane.getTranslateY());
+            event.consume();
+        });*/
 
+        zoomOperator.draggable(canvasPane);
         canvasPane.setMinWidth(2000);
         canvasPane.setMinHeight(2000);
     }
@@ -366,13 +377,10 @@ public class MainWindowController {
             try {
                 client.getCommandManager().runCommand(new CommandMsg("update").setArgument(Integer.toString(worker.getId())).setWorker(askWindowController.readWorker()));
             } catch (InvalidDataException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
-        workerTable.refresh();
-        //workerTable.getSelectionModel().set
 
-        refreshCanvas();
 
         /*if (!spaceMarineTable.getSelectionModel().isEmpty()) {
             long id = spaceMarineTable.getSelectionModel().getSelectedItem().getId();
@@ -391,8 +399,6 @@ public class MainWindowController {
     private void removeButtonOnAction() {
         Worker worker = workerTable.getSelectionModel().getSelectedItem();
         if(worker!=null) client.getCommandManager().runCommand(new CommandMsg("remove_by_id").setArgument(Integer.toString(worker.getId())));
-        workerTable.refresh();
-        refreshCanvas();
         /*if (!spaceMarineTable.getSelectionModel().isEmpty())
             requestAction(REMOVE_COMMAND_NAME,
                     spaceMarineTable.getSelectionModel().getSelectedItem().getId().toString(), null);
@@ -404,7 +410,7 @@ public class MainWindowController {
      */
     @FXML
     private void clearButtonOnAction() {
-        requestAction(CLEAR_COMMAND_NAME);
+        client.getCommandManager().runCommand(new CommandMsg("clear"));
     }
 
     /**
@@ -490,15 +496,31 @@ public class MainWindowController {
     @FXML
     private void filterStartsWithNameButtonOnAction() {
         Label startsWithLabel = new Label();
-
-        VBox vBox = new VBox();
-
         Stage stage = new Stage();
-        //Scene scene = new Scene(listView);
-        //stage.setScene(scene);
-        stage.showAndWait();
-        client.getCommandManager().runCommand(new CommandMsg("filter_starts_with_name").setArgument(""));
+        Label nameLabel = new Label();
+        TextField textField = new TextField();
+        Button button = new Button();
+        button.textProperty().bind(resourceFactory.getStringBinding("EnterButton"));
+        button.setOnAction((e)->{
+            String arg = textField.getText();
+            if(arg!=null && !arg.equals("")) {
+                client.getCommandManager().runCommand(new CommandMsg("filter_starts_with_name").setArgument(arg));
+                stage.close();
+            }
 
+        });
+        nameLabel.textProperty().bind(resourceFactory.getStringBinding("NameColumn"));
+        button.setAlignment(Pos.CENTER);
+
+        HBox hBox = new HBox(nameLabel,textField,button);
+        hBox.setAlignment(Pos.CENTER);
+        hBox.setSpacing(10);
+        Scene scene = new Scene(hBox);
+        stage.setScene(scene);
+        stage.setWidth(300);
+        stage.setHeight(100);
+        stage.setResizable(false);
+        stage.showAndWait();
     }
     @FXML
     private void helpButtonOnAction(){
@@ -540,7 +562,8 @@ public class MainWindowController {
         shapeMap.clear();
         textMap.values().forEach(s -> canvasPane.getChildren().remove(s));
         textMap.clear();
-        for (Worker worker : workerTable.getItems()) {
+        SortedList<Worker> list = workerTable.getItems().sorted((w1,w2)->w1.getSalary()>w2.getSalary()?0:1);
+        for (Worker worker : list) {
             if (!userColorMap.containsKey(worker.getUserLogin()))
                 userColorMap.put(worker.getUserLogin(),
                         Color.color(randomGenerator.nextDouble(), randomGenerator.nextDouble(), randomGenerator.nextDouble()));
@@ -579,6 +602,7 @@ public class MainWindowController {
             circleAnimation.play();
             textAnimation.play();
         }
+
     }
 
     /**
@@ -586,10 +610,17 @@ public class MainWindowController {
      */
     private void shapeOnMouseClicked(MouseEvent event) {
         Shape shape = (Shape) event.getSource();
+        //Tooltip.install(shape,shapeTooltip);
         long id = shapeMap.get(shape);
         for (Worker worker : workerTable.getItems()) {
             if (worker.getId() == id) {
+                if(shapeTooltip!=null && shapeTooltip.isShowing()) shapeTooltip.hide();
+                shapeTooltip = new Tooltip(worker.toString());
+                shapeTooltip.setAutoHide(true);
+                shapeTooltip.show(shape,event.getScreenX(),event.getScreenY());
                 workerTable.getSelectionModel().select(worker);
+                //shapeTooltip.setText(worker.toString());
+                //shapeTooltip.show(primaryStage);
                 break;
             }
         }

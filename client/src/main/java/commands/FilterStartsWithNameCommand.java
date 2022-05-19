@@ -26,7 +26,7 @@ public class FilterStartsWithNameCommand extends CommandImpl {
         List<Worker> list = collectionManager.filterStartsWithName(getStringArg());
         MainWindowController controller = collectionManager.getController();
         Platform.runLater(()->{
-            controller.getFilter().filter(controller.getNameColumn(), "^" + getStringArg()+".*");
+            controller.getFilter().filter(controller.getNameColumn(), "^" + getStringArg()+".*", Worker::getName);
         });
         if (list.isEmpty()) return "none of elements have name which starts with " + start;
         return list.stream()

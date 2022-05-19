@@ -46,7 +46,7 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
                 super.updateByID(worker.getId(),worker);
             }
         }
-        if(controller!=null && op!=CollectionOperation.NONE){
+        if(controller!=null && op!=CollectionOperation.NONE && changes!=null && !changes.isEmpty()){
             Platform.runLater(()->{
                 controller.refreshCanvas();
                 controller.refreshTable();

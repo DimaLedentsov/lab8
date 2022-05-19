@@ -45,7 +45,7 @@
                 </Label>
                 <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="1" GridPane.vgrow="SOMETIMES" />
                 <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" GridPane.vgrow="SOMETIMES" />
-                <ImageView fitHeight="164.0" fitWidth="507.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.vgrow="ALWAYS">
+                <ImageView fitHeight="114.0" fitWidth="537.0" pickOnBounds="true" preserveRatio="true" GridPane.columnSpan="2" GridPane.halignment="CENTER" GridPane.vgrow="ALWAYS">
                     <image>
                         <Image url="@../img/logo.png" />
                     </image>

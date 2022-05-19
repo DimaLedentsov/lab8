@@ -104,11 +104,12 @@ public class TableFilter <T>{
         table.setItems(filteredList);
         return this;
     }
-    public TableFilter<T> filter(TableColumn<T,?> column,String condition){
-        Converter<T> converter = columnsFilters.get(column).converter;
+    public TableFilter<T> filter(TableColumn<T,?> column,String condition, Converter<T> converter){
+        //Converter<T> converter = columnsFilters.get(column).converter;
         resetFilter(column);
         columnsFilters.put(column,new FilterArg(condition,converter));
         column.getStyleClass().add("filtered");
+        updateFilters();
         return this;
     }
     public void resetFilters(){

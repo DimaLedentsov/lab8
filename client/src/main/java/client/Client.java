@@ -130,6 +130,7 @@ public class Client extends Thread implements SenderReceiver {
      * @throws InvalidDataException
      */
     public Response receive() throws ConnectionException, InvalidDataException {
+        connected = false;
         try {
             socket.setSoTimeout(MAX_TIME_OUT);
         } catch (SocketException ignored) {
@@ -154,16 +155,18 @@ public class Client extends Thread implements SenderReceiver {
         } catch (IOException e) {
             throw new ConnectionException("something went wrong while receiving response");
         }
-
+        connected=true;
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes.array()));
             return (Response) objectInputStream.readObject();
         } catch (ClassNotFoundException | ClassCastException | IOException e) {
             throw new InvalidReceivedDataException();
         }
+
     }
 
     private Response receiveWithoutTimeLimits() throws ConnectionException,InvalidDataException{
+        connected = false;
         try {
             socket.setSoTimeout(0);
         } catch (SocketException ignored) {
@@ -176,7 +179,7 @@ public class Client extends Thread implements SenderReceiver {
         } catch (IOException e) {
             throw new ConnectionException("something went wrong while receiving response");
         }
-
+        connected=true;
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes.array()));
             return (Response) objectInputStream.readObject();
@@ -205,20 +208,26 @@ public class Client extends Thread implements SenderReceiver {
                 switch (response.getStatus()) {
                     case COLLECTION:
                         collectionManager.applyChanges(response);
-                        connected = true;
                         print("loaded!");
                         break;
                     case BROADCAST:
                         //commandManager.condition.await();
-                        print("broadcast!");
+                        print("caught broadcast!");
                         collectionManager.applyChanges(response);
                         break;
                     case AUTH_SUCCESS:
                         user = attempt;
                         authSuccess = true;
                         break;
+                    case EXIT:
+                        connected=false;
+                        print("server shut down");
+                        outputManager.error("ServerShutDown");
+                        break;
+                        //TODO when server closed exit on login
                     case ERROR:
                         outputManager.error(response.getMessage());
+
                     default:
                         print(response.getMessage());
                         receivedRequest = true;
@@ -238,7 +247,6 @@ public class Client extends Thread implements SenderReceiver {
         try {
             send(new CommandMsg().setStatus(Request.Status.CONNECTION_TEST));
             Response response = receive();
-
             connected= (response.getStatus()== Response.Status.FINE);
         } catch (ConnectionException| InvalidDataException ignored){
 

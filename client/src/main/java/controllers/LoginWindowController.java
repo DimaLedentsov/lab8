@@ -39,6 +39,10 @@ public class LoginWindowController {
      * SignI in button on action.
      */
     @FXML
+    private void initialize(){
+
+    }
+    @FXML
     private void signInButtonOnAction() {
 
         if (!client.isConnected()) {
@@ -51,6 +55,13 @@ public class LoginWindowController {
         client.processAuthentication(usernameField.getText(),
                 passwordField.getText(),
                 registerCheckBox.isSelected());
+        if (!client.isConnected()) {
+            isConnectedLabel.textProperty().bind(resourceFactory.getStringBinding("NotConnected"));
+            isConnectedLabel.setTextFill(NOT_CONNECTED_COLOR);
+        } else {
+            isConnectedLabel.textProperty().bind(resourceFactory.getStringBinding("Connected"));
+            isConnectedLabel.setTextFill(CONNECTED_COLOR);
+        }
         if (client.isAuthSuccess()) {
             app.setMainWindow();
             client.start();

@@ -253,6 +253,16 @@ public class Server extends Thread implements SenderReceiver {
      */
     public void close() {
         try {
+            broadcast(new AnswerMsg().setStatus(Response.Status.EXIT));
+
+            while (responseQueue.size()>0){
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException ignored){
+
+                }
+            }
             running = false;
             receiverThreadPool.shutdown();
             requestHandlerThreadPool.shutdown();
