@@ -15,7 +15,7 @@ public class HelpCommand extends CommandImpl {
 
     @Override
     public String execute() {
-        Platform.runLater(()->{
+        /*Platform.runLater(()->{
             Text text = new Text(CommandManager.getHelp());
             TextFlow textFlow = new TextFlow(text);
             Stage stage = new Stage();
@@ -23,7 +23,7 @@ public class HelpCommand extends CommandImpl {
             stage.setScene(scene);
             stage.setTitle("s");
             stage.showAndWait();
-        });
+        });*/
         return CommandManager.getHelp();
     }
 }

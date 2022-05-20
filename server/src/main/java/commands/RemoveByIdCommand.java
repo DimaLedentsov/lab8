@@ -1,6 +1,6 @@
 package commands;
 
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
@@ -30,13 +30,13 @@ public class RemoveByIdCommand extends CommandImpl {
         if (!hasStringArg()) throw new MissedCommandArgumentException();
         Integer id = parseId(getStringArg());
         if (!collectionManager.checkID(id))
-            throw new InvalidCommandArgumentException("no such id #" + id);
+            throw new NoSuchIdException(id);
 
         String owner = collectionManager.getByID(id).getUserLogin();
         String workerCreatorLogin = user.getLogin();
 
         if (workerCreatorLogin == null || !workerCreatorLogin.equals(owner))
-            throw new AuthException("you dont have permission, element was created by " + owner);
+            throw new PermissionException(owner);
         Worker worker = collectionManager.getByID(id);
         collectionManager.removeByID(id);
         return new AnswerMsg().info( "element #" + id + " removed").setCollection(Arrays.asList(worker));

@@ -164,7 +164,7 @@ public class App extends Application {
             mainWindowController.initLangs(resourceFactory);
             mainWindowController.setClient(client);
             mainWindowController.initFilter();
-
+            mainWindowController.setApp(this);
 
 
             primaryStage.setScene(mainWindowScene);
@@ -172,7 +172,7 @@ public class App extends Application {
             primaryStage.setMinHeight(mainWindowScene.getHeight());
             primaryStage.setResizable(true);
             primaryStage.setOnCloseRequest((e)->{
-                print("aa");
+                print("exiting...");
                 client.close();
             });
 

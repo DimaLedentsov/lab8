@@ -1,7 +1,7 @@
 package server;
 
 import auth.UserManager;
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import commands.ServerCommandManager;
 import common.auth.User;
 import common.commands.CommandType;
@@ -330,5 +330,9 @@ public class Server extends Thread implements SenderReceiver {
                 Log.logger.error(e.getMessage());
             }
         }
+    }
+
+    public boolean isRunning(){
+        return running;
     }
 }

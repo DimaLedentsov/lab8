@@ -5,6 +5,6 @@ package common.exceptions;
  */
 public class MissedCommandArgumentException extends InvalidCommandArgumentException {
     public MissedCommandArgumentException() {
-        super("missed command argument");
+        super("[MissedCommandArgumentException] missed command argument");
     }
 }

@@ -1,6 +1,6 @@
 package commands;
 
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
@@ -29,13 +29,13 @@ public class UpdateCommand extends CommandImpl {
         if (collectionManager.getCollection().isEmpty()) throw new EmptyCollectionException();
         if (!hasStringArg() || !hasWorkerArg()) throw new MissedCommandArgumentException();
         Integer id = parseId(getStringArg());
-        if (!collectionManager.checkID(id)) throw new InvalidCommandArgumentException("no such id #" + getStringArg());
+        if (!collectionManager.checkID(id)) throw new NoSuchIdException(id);
 
         String owner = collectionManager.getByID(id).getUserLogin();
         String workerCreatorLogin = user.getLogin();
 
         if (workerCreatorLogin == null || !workerCreatorLogin.equals(owner))
-            throw new AuthException("you dont have permission, element was created by " + owner);
+            throw new PermissionException(owner);
 
         collectionManager.updateByID(id, getWorkerArg());
         return new AnswerMsg().info( "element #" + id + " updated").setCollection(List.of(getWorkerArg())).setCollectionOperation(CollectionOperation.UPDATE);

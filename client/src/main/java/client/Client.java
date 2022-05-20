@@ -26,6 +26,7 @@ import static common.io.ConsoleOutputter.printErr;
 public class Client extends Thread implements SenderReceiver {
     private SocketAddress address;
     private DatagramSocket socket;
+    private DatagramSocket broadcastSocket;
     public final int MAX_TIME_OUT = 500;
     public final int MAX_ATTEMPTS = 3;
     private User user;
@@ -96,6 +97,7 @@ public class Client extends Thread implements SenderReceiver {
         }
         try {
             socket = new DatagramSocket();
+            broadcastSocket = new DatagramSocket(3333);
             socket.setSoTimeout(MAX_TIME_OUT);
         } catch (IOException e) {
             throw new ConnectionException("cannot open socket");
@@ -188,6 +190,28 @@ public class Client extends Thread implements SenderReceiver {
         }
     }
 
+    private Response receiveBroadcast() throws ConnectionException, InvalidDataException{
+        try {
+            broadcastSocket.setSoTimeout(0);
+        } catch (SocketException ignored) {
+
+        }
+        ByteBuffer bytes = ByteBuffer.allocate(BUFFER_SIZE);
+        DatagramPacket receivePacket = new DatagramPacket(bytes.array(), bytes.array().length);
+        try {
+            broadcastSocket.receive(receivePacket);
+        } catch (IOException e) {
+            throw new ConnectionException("something went wrong while receiving response");
+        }
+        connected=true;
+        try {
+            ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(bytes.array()));
+            return (Response) objectInputStream.readObject();
+        } catch (ClassNotFoundException | ClassCastException | IOException e) {
+            throw new InvalidReceivedDataException();
+        }
+    }
+
     /**
      * runs client until interrupt
      */
@@ -222,11 +246,13 @@ public class Client extends Thread implements SenderReceiver {
                     case EXIT:
                         connected=false;
                         print("server shut down");
-                        outputManager.error("ServerShutDown");
+                        outputManager.error("[ServerShutDown]");
                         break;
                         //TODO when server closed exit on login
                     case ERROR:
-                        outputManager.error(response.getMessage());
+                        String msg = response.getMessage();
+                        outputManager.error(msg);
+
 
                     default:
                         print(response.getMessage());
@@ -269,10 +295,10 @@ public class Client extends Thread implements SenderReceiver {
             if (authSuccess) {
                 user = attempt;
             } else {
-                outputManager.error("AuthException");
+                outputManager.error(!register?"[AuthException]":"[RegisterException] " + "[" + getAttemptUser() + "]");
             }
         } catch (ConnectionTimeoutException e){
-            outputManager.error("connection timeout");
+            outputManager.error("[TimeoutException]");
             connected = false;
         } catch (ConnectionException|InvalidDataException e) {
             connected=false;

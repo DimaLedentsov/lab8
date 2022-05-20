@@ -25,6 +25,7 @@ public interface Response extends Serializable {
         COLLECTION
     }
 
+
     CollectionOperation getCollectionOperation();
 
     public Collection<Worker> getCollection();

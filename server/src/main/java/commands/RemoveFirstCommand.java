@@ -1,6 +1,6 @@
 package commands;
 
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.auth.User;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
@@ -8,6 +8,7 @@ import common.connection.CollectionOperation;
 import common.exceptions.AuthException;
 import common.exceptions.EmptyCollectionException;
 import common.exceptions.InvalidDataException;
+import common.exceptions.PermissionException;
 
 public class RemoveFirstCommand extends CommandImpl {
     private final WorkerManager collectionManager;
@@ -27,7 +28,7 @@ public class RemoveFirstCommand extends CommandImpl {
         String owner = collectionManager.getByID(id).getUserLogin();
         String workerCreatorLogin = user.getLogin();
         if (workerCreatorLogin == null || !workerCreatorLogin.equals(owner))
-            throw new AuthException("you dont have permission, element was created by " + owner);
+            throw new PermissionException(owner);
         collectionManager.removeFirst();
         return "element #" + id + " successfully deleted";
     }

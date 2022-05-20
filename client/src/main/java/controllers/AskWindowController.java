@@ -80,7 +80,7 @@ public class AskWindowController {
     public String readName() throws InvalidDataException {
         String s = nameField.getText();
         if (s==null||s.equals("")) {
-            throw new InvalidDataException("NameEmptyException");
+            throw new InvalidDataException("[NameEmptyException]");
         }
         return s;
     }
@@ -98,9 +98,9 @@ public class AskWindowController {
         try {
             x = Float.parseFloat(coordinatesXField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidDataException("XCoordFormatException");
+            throw new InvalidDataException("[XCoordFormatException]");
         }
-        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidDataException("XCoordFormatException");
+        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidDataException("[XCoordFormatException]");
         return x;
     }
 
@@ -109,9 +109,9 @@ public class AskWindowController {
         try {
             y = Long.parseLong(coordinatesYField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidDataException("YCoordFormatException");
+            throw new InvalidDataException("[YCoordFormatException]");
         }
-        if (y <= -123) throw new InvalidDataException("YCoordLimitException");
+        if (y <= -123) throw new InvalidDataException("[YCoordLimitException]");
         return y;
     }
 
@@ -127,10 +127,10 @@ public class AskWindowController {
         try {
             s = Long.parseLong(salaryField.getText());
         } catch (NumberFormatException e) {
-            throw new InvalidDataException("SalaryFormatException");
+            throw new InvalidDataException("[SalaryFormatException]");
         }
 
-        if (s <= 0) throw new InvalidNumberException("SalaryLimitException");
+        if (s <= 0) throw new InvalidNumberException("[SalaryLimitException]");
 
         return s;
     }
@@ -143,7 +143,7 @@ public class AskWindowController {
             try {
                 return parseLocalDate(buf);
             } catch (InvalidDateFormatException e){
-                throw new InvalidDataException("EndDateFormatException");
+                throw new InvalidDataException("[EndDateFormatException]");
             }
         }
     }
@@ -169,7 +169,7 @@ public class AskWindowController {
     public Worker readWorker() throws InvalidDataException {
         askStage.showAndWait();
 
-        //if(worker==null) throw new InvalidDataException("");
+        if(worker==null) throw new InvalidDataException("");
         return worker;
 
     }

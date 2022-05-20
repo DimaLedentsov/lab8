@@ -13,7 +13,6 @@ public class AnswerMsg implements Response {
     private Status status;
     private Collection<Worker> collection;
     private CollectionOperation collectionOperation;
-
     public AnswerMsg() {
         msg = "";
         status = Status.FINE;
@@ -67,6 +66,8 @@ public class AnswerMsg implements Response {
     public  CollectionOperation getCollectionOperation(){
         return collectionOperation;
     }
+
+
     public AnswerMsg setCollection(Collection<Worker> c){
         collection = c;
         return  this;

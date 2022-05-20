@@ -5,6 +5,6 @@ package common.exceptions;
  */
 public class NoSuchCommandException extends CommandException {
     public NoSuchCommandException() {
-        super("wrong command");
+        super("[NoSuchCommandException] wrong command");
     }
 }

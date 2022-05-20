@@ -47,6 +47,11 @@ public class Main {
 
             server.start();
             server.consoleMode();
+            Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+                public void run() {
+                    if(server.isRunning()) server.close();
+                }
+            }, "Shutdown-thread"));
 
         } catch (ConnectionException | DatabaseException e) {
             Log.logger.error(e.getMessage());

@@ -3,8 +3,10 @@ package controllers;
 
 import common.connection.CommandMsg;
 import common.connection.Request;
+import common.connection.Response;
 import common.data.*;
 import common.exceptions.ConnectionException;
+import common.exceptions.ConnectionTimeoutException;
 import common.exceptions.InvalidDataException;
 import common.utils.DateConverter;
 import controllers.tools.TableFilter;
@@ -152,6 +154,7 @@ public class MainWindowController {
     @FXML
     private Label usernameLabel;
 
+    private App app;
     private Tooltip shapeTooltip;
     private TableFilter<Worker> tableFilter;
     private Client client;
@@ -558,6 +561,19 @@ public class MainWindowController {
             refreshCanvas();
         }*/
     }
+    private boolean askServer(Request request){
+        Response response;
+        try {
+            client.send(request);
+            response = client.receive();
+        } catch (ConnectionTimeoutException e){
+            app.getOutputManager().error("ConnectionTimeoutException");
+        }catch (InvalidDataException|ConnectionException e){
+            app.getOutputManager().error("ConnectionException");
+        }
+        //if(response!=null)
+        return false;
+    }
 
     /**
      * Binds request action.
@@ -684,5 +700,8 @@ public class MainWindowController {
                 resourceFactory.setResources(ResourceBundle.getBundle
                         (App.BUNDLE, localeMap.get(languageComboBox.getValue()))));
         bindGuiLanguage();
+    }
+    public void setApp(App a){
+        app = a;
     }
 }

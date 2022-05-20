@@ -5,6 +5,6 @@ package common.exceptions;
  */
 public class EmptyCollectionException extends CollectionException {
     public EmptyCollectionException() {
-        super("collection is empty");
+        super("[EmptyCollectionException] collection is empty");
     }
 }

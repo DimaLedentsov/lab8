@@ -1,6 +1,6 @@
 package commands;
 
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
 import common.exceptions.InvalidDataException;
@@ -10,7 +10,7 @@ public class InfoCommand extends CommandImpl {
 
     public InfoCommand(WorkerManager cm) {
         super("info", CommandType.NORMAL);
-        collectionManager = cm;
+        collectionManager = cm;//TODO
     }
 
     @Override

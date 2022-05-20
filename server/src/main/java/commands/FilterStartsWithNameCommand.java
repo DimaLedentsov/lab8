@@ -1,6 +1,6 @@
 package commands;
 
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.commands.CommandImpl;
 import common.commands.CommandType;
 import common.data.Worker;

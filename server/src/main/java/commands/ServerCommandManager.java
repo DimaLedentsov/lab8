@@ -1,7 +1,7 @@
 package commands;
 
 import auth.UserManager;
-import collection.WorkerManager;
+import common.collection.WorkerManager;
 import common.auth.User;
 import common.commands.Command;
 import common.commands.CommandManager;

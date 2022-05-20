@@ -5,6 +5,10 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+import java.text.MessageFormat;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 /**
@@ -55,7 +59,45 @@ public class ObservableResourceFactory {
             }
         };
     }
+
+    public StringBinding getFormattedBunding(String key) {
+        return new StringBinding() {
+            {
+                bind(resourcesProperty());
+            }
+
+            @Override
+            public String computeValue() {
+                return getString(key);
+            }
+        };
+    }
     public String getString(String key){
+        String res;
+        if(key.contains(" ") && key.contains("[") && key.contains("]")){
+            String[] seq = key.split(" ");
+            List<String> list = new LinkedList<>();
+            for(String e: seq){
+                if(e.length()>=3&& e.charAt(0)=='[' && e.charAt(e.length()-1)==']'){
+                    list.add(e.substring(1,e.length()-1));
+                }
+            }
+            key = list.get(0);
+            list.remove(0);
+
+            Object[] args = list.toArray();
+            res = MessageFormat.format(getResources().getString(key), args);
+        }
+        else if(key.length()>=3&& key.charAt(0)=='[' && key.charAt(key.length()-1)==']'){
+            res = getResources().getString(key.substring(1,key.length()-1));
+        }else{
+            throw new RuntimeException("resources error: " + key);
+        }
+
+        return res;
+    }
+    public String getRawString(String key){
         return getResources().getString(key);
     }
+
 }

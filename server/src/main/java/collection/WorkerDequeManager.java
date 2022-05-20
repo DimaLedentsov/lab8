@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import common.collection.WorkerManager;
 import common.data.Worker;
 import common.exceptions.CannotAddException;
 import common.exceptions.CollectionException;
