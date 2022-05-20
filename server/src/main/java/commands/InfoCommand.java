@@ -14,7 +14,7 @@ public class InfoCommand extends CommandImpl {
     }
 
     @Override
-    public String execute() throws InvalidDataException {
+    public String execute() {
         return collectionManager.getInfo();
     }
 

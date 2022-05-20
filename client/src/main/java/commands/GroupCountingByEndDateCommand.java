@@ -61,7 +61,7 @@ public class GroupCountingByEndDateCommand extends CommandImpl {
             Scene scene = new Scene(tableView);
             tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
             stage.setScene(scene);
-            stage.showAndWait();
+            stage.show();
         });
 
         return res;

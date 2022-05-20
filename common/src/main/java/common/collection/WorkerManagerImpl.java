@@ -97,7 +97,7 @@ public abstract class WorkerManagerImpl<T extends Collection<Worker>> implements
      * @return Information
      */
     public String getInfo() {
-        return "Database of Worker, size: " + getCollection().size() + ", initialization date: " + initDate.toString();
+        return "[DatabaseInfo] Database of Worker, size: [" + getCollection().size() + "] ; initialization date: [" + initDate.toString()+"]";
     }
 
     /**

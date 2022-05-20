@@ -7,6 +7,7 @@ import common.connection.Response;
 import common.data.*;
 import common.exceptions.ConnectionException;
 import common.exceptions.ConnectionTimeoutException;
+import common.exceptions.FileException;
 import common.exceptions.InvalidDataException;
 import common.utils.DateConverter;
 import controllers.tools.TableFilter;
@@ -216,6 +217,10 @@ public class MainWindowController {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getPosition()));
         endDateColumn.setCellValueFactory(cellData ->
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getEndDate()));
+        organizationNameColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getFullName()));
+        organizationTypeColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getType()));
 
         creationDateColumn.setCellFactory(column -> {
             TableCell<Worker, Date> cell = new TableCell<Worker, Date>() {
@@ -233,10 +238,23 @@ public class MainWindowController {
 
             return cell;
         });
-        organizationNameColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getFullName()));
-        organizationTypeColumn.setCellValueFactory(cellData ->
-                new ReadOnlyObjectWrapper<>(cellData.getValue().getOrganization().getType()));
+        endDateColumn.setCellFactory(column -> {
+            TableCell<Worker, LocalDate> cell = new TableCell<Worker, LocalDate>() {
+                @Override
+                protected void updateItem(LocalDate item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if(empty) {
+                        setText(null);
+                    }
+                    else {
+                        setText(DateConverter.dateToString(item));
+                    }
+                }
+            };
+
+            return cell;
+        });
+
         //workerTable.setItems(FXCollections.observableArrayList());
        //s TableFilter<Worker> tableFilter = TableFilter.forTableView(workerTable).apply();
         /*workerTable.setOnSort((e)->{
@@ -371,7 +389,7 @@ public class MainWindowController {
      */
     @FXML
     private void infoButtonOnAction() {
-        requestAction(INFO_COMMAND_NAME);
+        client.getCommandManager().runCommand(new CommandMsg("info"));
     }
 
 
@@ -438,10 +456,13 @@ public class MainWindowController {
      */
     @FXML
     private void executeScriptButtonOnAction() {
-        /*File selectedFile = fileChooser.showOpenDialog(primaryStage);
+        File selectedFile = fileChooser.showOpenDialog(primaryStage);
         if (selectedFile == null) return;
-        if (client.processScriptToServer(selectedFile)) Platform.exit();
-        else refreshButtonOnAction();*/
+        try {
+            client.getCommandManager().runFile(selectedFile);
+        } catch (FileException e) {
+            app.getOutputManager().error(e.getMessage());
+        }
     }
 
     /**
@@ -585,6 +606,7 @@ public class MainWindowController {
 
     public void refreshTable(){
         workerTable.refresh();
+        tableFilter.updateFilters();
     }
     /**
      * Refreshes canvas.
@@ -696,9 +718,22 @@ public class MainWindowController {
         }
         if (languageComboBox.getSelectionModel().getSelectedItem().isEmpty())
             languageComboBox.getSelectionModel().selectFirst();
-        languageComboBox.setOnAction((event) ->
-                resourceFactory.setResources(ResourceBundle.getBundle
-                        (App.BUNDLE, localeMap.get(languageComboBox.getValue()))));
+        languageComboBox.setOnAction((event) ->{
+            Locale locale = localeMap.get(languageComboBox.getValue());
+            resourceFactory.setResources(ResourceBundle.getBundle
+                    (App.BUNDLE, locale));
+            switch (locale.toString()){
+                case "en_NZ":
+                    DateConverter.setPattern("yyyy-MM-dd");
+                    break;
+                case "ru_RU":
+                    DateConverter.setPattern("yyyy/MM/dd");
+                    break;
+            }
+
+            System.out.println(locale);
+            workerTable.refresh();
+        });
         bindGuiLanguage();
     }
     public void setApp(App a){

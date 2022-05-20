@@ -8,7 +8,9 @@ import common.exceptions.*;
 import commands.*;
 import common.commands.*;
 import common.connection.*;
+import common.io.FileInputManager;
 
+import java.io.File;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -18,8 +20,6 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ClientCommandManager extends CommandManager {
     private final Client client;
-    public final Lock lock = new ReentrantLock();
-    public final Condition condition = lock.newCondition();
     public ClientCommandManager(Client c) {
         client = c;
         addCommand(new ExecuteScriptCommand(this));
@@ -64,5 +64,31 @@ public class ClientCommandManager extends CommandManager {
         }
         print(res);
         return res;
+    }
+    @Override
+    public void fileMode(String path) throws FileException {
+        currentScriptFileName=path;
+        inputManager = new FileInputManager(path);
+        isRunning = true;
+        while (isRunning && inputManager.hasNextLine()) {
+            CommandMsg commandMsg = inputManager.readCommand();
+            Response answerMsg = runCommand(commandMsg);
+            if (answerMsg.getStatus() == Response.Status.EXIT||answerMsg.getStatus() == Response.Status.ERROR) {
+                close();
+            }
+        }
+    }
+
+    public void runFile(File file) throws FileException{
+        currentScriptFileName=file.getName();
+        inputManager = new FileInputManager(file);
+        isRunning = true;
+        while (isRunning && inputManager.hasNextLine()) {
+            CommandMsg commandMsg = inputManager.readCommand();
+            Response answerMsg = runCommand(commandMsg);
+            if (answerMsg.getStatus() == Response.Status.EXIT||answerMsg.getStatus() == Response.Status.ERROR) {
+                close();
+            }
+        }
     }
 }

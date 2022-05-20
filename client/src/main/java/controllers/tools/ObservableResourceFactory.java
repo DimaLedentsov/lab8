@@ -82,21 +82,23 @@ public class ObservableResourceFactory {
                     list.add(e.substring(1,e.length()-1));
                 }
             }
+            if(list.size()==0) throw new ResourceException(key);
             key = list.get(0);
             list.remove(0);
 
             Object[] args = list.toArray();
-            res = MessageFormat.format(getResources().getString(key), args);
+            res = MessageFormat.format(getRawString(key), args);
         }
         else if(key.length()>=3&& key.charAt(0)=='[' && key.charAt(key.length()-1)==']'){
-            res = getResources().getString(key.substring(1,key.length()-1));
+            res = getRawString(key.substring(1,key.length()-1));
         }else{
-            throw new RuntimeException("resources error: " + key);
+            throw new ResourceException(key);
         }
 
         return res;
     }
     public String getRawString(String key){
+        if(!getResources().containsKey(key)) throw  new ResourceException(key);
         return getResources().getString(key);
     }
 

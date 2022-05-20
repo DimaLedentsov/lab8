@@ -35,7 +35,7 @@ public class PrintUniqueSalaryCommand extends CommandImpl {
             Scene scene = new Scene(listView);
             stage.setScene(scene);
             stage.setTitle("s");
-            stage.showAndWait();
+            stage.show();
         });
         return list.stream().map(n -> Long.toString(n)).reduce("", (a, b) -> a + b + "\n");
     }

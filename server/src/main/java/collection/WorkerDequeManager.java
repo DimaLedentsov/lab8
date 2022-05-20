@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import common.collection.WorkerManager;
+import common.collection.WorkerManagerImpl;
 import common.data.Worker;
 import common.exceptions.CannotAddException;
 import common.exceptions.CollectionException;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * Operates collection.
  */
-public class WorkerDequeManager  implements WorkerManager {
+public class WorkerDequeManager extends WorkerManagerImpl<ConcurrentLinkedDeque<Worker>>{
     private Deque<Worker> collection;
     private final java.time.LocalDateTime initDate;
     private final Set<Integer> uniqueIds;
@@ -36,6 +37,9 @@ public class WorkerDequeManager  implements WorkerManager {
         uniqueIds = new ConcurrentSkipListSet<>();
         collection = new ConcurrentLinkedDeque<>();
         initDate = java.time.LocalDateTime.now();
+    }
+    public Set<Integer> getUniqueIds(){
+        return uniqueIds;
     }
 
     public int generateNextId() {
@@ -49,19 +53,16 @@ public class WorkerDequeManager  implements WorkerManager {
             return id;
         }
     }
+    @Override
+    public Deque<Worker> getCollection(){
+        return collection;
+    }
 
     public void sort() {
         collection = collection.stream().sorted(new Worker.SortingComparator()).collect(Collectors.toCollection(ConcurrentLinkedDeque::new));
     }
 
-    /**
-     * Return collection
-     *
-     * @return Collection
-     */
-    public Deque<Worker> getCollection() {
-        return collection;
-    }
+
 
     /**
      * Add element to collection
@@ -109,14 +110,6 @@ public class WorkerDequeManager  implements WorkerManager {
         }
     }
 
-    /**
-     * Get information about collection
-     *
-     * @return Information
-     */
-    public String getInfo() {
-        return "Database of Worker, size: " + collection.size() + ", initialization date: " + initDate.toString();
-    }
 
     /**
      * Give info about is this ID used
@@ -189,69 +182,6 @@ public class WorkerDequeManager  implements WorkerManager {
         uniqueIds.remove(id);
     }
 
-    /**
-     * Add if ID of element bigger than max in collection
-     *
-     * @param worker Element
-     */
-    public void addIfMax(Worker worker) {
-        if (collection.stream()
-                .max(Worker::compareTo)
-                .filter(w -> w.compareTo(worker) == 1)
-                .isPresent()) {
-            throw new CannotAddException();
-        }
-        add(worker);
-    }
-
-    /**
-     * Add if ID of element smaller than min in collection
-     *
-     * @param worker Element
-     */
-    public void addIfMin(Worker worker) {
-        if (collection.stream()
-                .min(Worker::compareTo)
-                .filter(w -> w.compareTo(worker) < 0)
-                .isPresent()) {
-            throw new CannotAddException();
-        }
-        add(worker);
-    }
-
-    public List<Worker> filterStartsWithName(String start) {
-        assertNotEmpty();
-        return collection.stream()
-                .filter(w -> w.getName().startsWith(start.trim()))
-                .collect(Collectors.toList());
-    }
-
-    public Map<LocalDate, Integer> groupByEndDate() {
-        assertNotEmpty();
-        HashMap<LocalDate, Integer> map = new HashMap<>();
-        collection.stream()
-                .filter((worker -> worker.getEndDate() != null))
-                .forEach((worker) -> {
-                    LocalDate endDate = worker.getEndDate();
-                    if (map.containsKey(endDate)) {
-                        Integer q = map.get(endDate);
-                        map.replace(endDate, q + 1);
-                    } else {
-                        map.put(endDate, 1);
-                    }
-                });
-        return map;
-    }
-
-    public List<Long> getUniqueSalaries() {
-        assertNotEmpty();
-        List<Long> salaries = new LinkedList<>();
-        salaries = collection.stream()
-                .map(Worker::getSalary)
-                .distinct()
-                .collect(Collectors.toList());
-        return salaries;
-    }
 
     public void deserializeCollection(String json) {
         try {

@@ -13,8 +13,14 @@ import java.util.Date;
  * Provides methods to convenient conversion between String and Date
  */
 public class DateConverter {
-    private static final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-    private static final DateTimeFormatter localDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static String pattern = "yyyy-MM-dd";
+    private static DateFormat dateFormatter = new SimpleDateFormat(pattern);
+    private static DateTimeFormatter localDateFormatter = DateTimeFormatter.ofPattern(pattern);
+    public static void setPattern(String p){
+        pattern = p;
+        dateFormatter = new SimpleDateFormat(pattern);
+        localDateFormatter = DateTimeFormatter.ofPattern(pattern);
+    }
 
     /**
      * convert Date to String

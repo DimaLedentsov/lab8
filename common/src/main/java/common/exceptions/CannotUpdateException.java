@@ -1,7 +1,7 @@
 package common.exceptions;
 
-public class CannotRemoveException extends CollectionException{
-    public CannotRemoveException(Integer id){
+public class CannotUpdateException extends CollectionException{
+    public CannotUpdateException(Integer id){
         super("[CannotUpdateException] unable to update element ["+id+"]");
     }
 }

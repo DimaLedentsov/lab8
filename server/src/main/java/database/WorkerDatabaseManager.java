@@ -4,10 +4,7 @@ import auth.UserManager;
 import collection.WorkerDequeManager;
 import common.auth.User;
 import common.data.*;
-import common.exceptions.CollectionException;
-import common.exceptions.DatabaseException;
-import common.exceptions.InvalidDataException;
-import common.exceptions.InvalidEnumException;
+import common.exceptions.*;
 import common.utils.DateConverter;
 import log.Log;
 
@@ -149,7 +146,7 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
             databaseHandler.commit();
         } catch (SQLException | DatabaseException e) {
             databaseHandler.rollback();
-            throw new DatabaseException("cannot add to database");
+            throw new CannotAddException();
         } finally {
             databaseHandler.setNormalMode();
         }
@@ -164,7 +161,7 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
             statement.setInt(1, id);
             statement.execute();
         } catch (SQLException e) {
-            throw new DatabaseException("cannot remove from database");
+            throw new CannotRemoveException(id);
         }
         super.removeByID(id);
     }
@@ -199,7 +196,7 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
             databaseHandler.commit();
         } catch (SQLException e) {
             databaseHandler.rollback();
-            throw new DatabaseException("cannot update worker #" + worker.getId() + " in database");
+            throw new CannotUpdateException(id);
         } finally {
             databaseHandler.setNormalMode();
         }
@@ -221,11 +218,11 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
              PreparedStatement insertStatement = databaseHandler.getPreparedStatement(INSERT_WORKER_QUERY)) {
 
             ResultSet resultSet = getStatement.executeQuery(getMaxQuery);
-            if (!resultSet.next()) throw new DatabaseException("unable to add");
+            if (!resultSet.next()) throw new CannotAddException();
 
             long maxSalary = resultSet.getLong(1);
             if (worker.getSalary() < maxSalary)
-                throw new DatabaseException("unable to add, max salary is " + maxSalary + " current salary is " + worker.getSalary());
+                throw new DatabaseException("[AddIfMaxException] unable to add, max salary is [" + maxSalary + "] current salary is [" + worker.getSalary()+"]");
 
             setWorker(insertStatement, worker);
 
@@ -233,7 +230,7 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
             databaseHandler.commit();
         } catch (SQLException e) {
             databaseHandler.rollback();
-            throw new DatabaseException("cannot add due to internal error");
+            throw new CannotAddException();
         } finally {
             databaseHandler.setNormalMode();
         }
@@ -255,11 +252,11 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
              PreparedStatement insertStatement = databaseHandler.getPreparedStatement(INSERT_WORKER_QUERY)) {
 
             ResultSet resultSet = getStatement.executeQuery(getMaxQuery);
-            if (!resultSet.next()) throw new DatabaseException("unable to add");
+            if (!resultSet.next()) throw new CannotAddException();
 
             long minSalary = resultSet.getLong(1);
             if (worker.getSalary() > minSalary)
-                throw new DatabaseException("unable to add, min salary is " + minSalary + " current salary is " + worker.getSalary());
+                throw new DatabaseException("[AddIfMinException] unable to add, min salary is [" + minSalary + "] current salary is [" + worker.getSalary()+"]");
 
             setWorker(insertStatement, worker);
 

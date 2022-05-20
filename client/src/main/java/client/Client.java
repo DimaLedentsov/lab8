@@ -15,6 +15,7 @@ import common.connection.*;
 import common.exceptions.*;
 import common.io.OutputManager;
 import controllers.tools.ObservableResourceFactory;
+import controllers.tools.ResourceException;
 import io.OutputterUI;
 
 import static common.io.ConsoleOutputter.print;
@@ -228,7 +229,7 @@ public class Client extends Thread implements SenderReceiver {
             try {
                 receivedRequest = false;
                 Response response = receiveWithoutTimeLimits();
-
+                String msg = response.getMessage();
                 switch (response.getStatus()) {
                     case COLLECTION:
                         collectionManager.applyChanges(response);
@@ -249,13 +250,18 @@ public class Client extends Thread implements SenderReceiver {
                         outputManager.error("[ServerShutDown]");
                         break;
                         //TODO when server closed exit on login
+                    case FINE:
+                        try {
+                            outputManager.info(msg);
+                        } catch (ResourceException ignored){
+
+                        }
+                        break;
                     case ERROR:
-                        String msg = response.getMessage();
                         outputManager.error(msg);
 
-
                     default:
-                        print(response.getMessage());
+                        print(msg);
                         receivedRequest = true;
                         break;
                 }

@@ -49,7 +49,7 @@
                 </AnchorPane>
             </Tab>
             <Tab fx:id="canvasTab" text="CanvasTab">
-                <AnchorPane fx:id="canvasPane" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: white,                             linear-gradient(from 0.5px 0.0px to 10.5px  0.0px, repeat, grey 5%, transparent 5%),                             linear-gradient(from 0.0px 0.5px to  0.0px 10.5px, repeat, grey 5%, transparent 5%);">
+                <AnchorPane fx:id="canvasPane" prefHeight="180.0" prefWidth="200.0" style="-fx-background-color: white;">
                     <cursor>
                         <Cursor fx:constant="CROSSHAIR" />
                     </cursor>

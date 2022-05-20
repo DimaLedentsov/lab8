@@ -137,7 +137,7 @@ public class AskWindowController {
 
     public LocalDate readEndDate() throws InvalidDataException {
         String buf = endDateField.getText();
-        if (buf.equals("")) {
+        if (buf==null||buf.equals("")) {
             return null;
         } else {
             try {

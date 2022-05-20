@@ -1,7 +1,9 @@
 package io;
 
+import common.io.ConsoleOutputter;
 import common.io.OutputManager;
 import controllers.tools.ObservableResourceFactory;
+import controllers.tools.ResourceException;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -28,20 +30,24 @@ public class OutputterUI implements OutputManager {
                 alert.setContentText(s);
             }
             alert.getDialogPane().setStyle("-fx-font-size: 13");
-            alert.showAndWait();
+            alert.show();
 
         });
     }
 
     public void info(String s){
         Platform.runLater(()->{
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            //alert.setTitle("info");
-            //alert.setHeaderText(s);
-            alert.setContentText(resourceFactory.getString(s));
-            alert.getDialogPane().setStyle("-fx-font-size: 13");
-            alert.setHeaderText(null);
-            alert.showAndWait();
+            try {
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                //alert.setTitle("info");
+                //alert.setHeaderText(s);
+                alert.setContentText(resourceFactory.getString(s));
+                alert.getDialogPane().setStyle("-fx-font-size: 13");
+                alert.setHeaderText(null);
+                alert.show();
+            }catch (ResourceException ignored){
+                //ConsoleOutputter.printErr(e.getMessage());
+            }
         });
     }
 

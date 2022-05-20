@@ -13,9 +13,9 @@ import static common.io.ConsoleOutputter.print;
 
 public abstract class CommandManager implements Commandable, Closeable {
     private final Map<String, Command> map;
-    private InputManager inputManager;
-    private boolean isRunning;
-    private String currentScriptFileName;
+    protected InputManager inputManager;
+    protected boolean isRunning;
+    protected String currentScriptFileName;
     private static final Stack<String> callStack = new Stack<>();
 
     public void clearStack() {
@@ -29,7 +29,9 @@ public abstract class CommandManager implements Commandable, Closeable {
     public String getCurrentScriptFileName() {
         return currentScriptFileName;
     }
-
+    public void setCurrentScriptFileName(String cn){
+        currentScriptFileName = cn;
+    }
     public CommandManager() {
         isRunning = false;
         currentScriptFileName = "";
