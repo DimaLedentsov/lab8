@@ -7,4 +7,7 @@ public class InvalidEnumException extends InvalidDataException {
     public InvalidEnumException() {
         super("wrong constant");
     }
+    public InvalidEnumException(String s){
+        super(s);
+    }
 }

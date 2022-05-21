@@ -152,12 +152,16 @@ public class AskWindowController {
         return  positionBox.getSelectionModel().getSelectedItem();
     }
 
-    public Status readStatus() {
-        return statusBox.getSelectionModel().getSelectedItem();
+    public Status readStatus() throws InvalidEnumException{
+        Status status = statusBox.getSelectionModel().getSelectedItem();
+        if(status==null) throw new InvalidEnumException("[StatusEmptyException]");
+        return status;
     }
 
     public OrganizationType readOrganizationType() throws InvalidEnumException {
-       return organizationTypeBox.getSelectionModel().getSelectedItem();
+       OrganizationType type= organizationTypeBox.getSelectionModel().getSelectedItem();
+       if(type==null) throw new InvalidEnumException("[OrganizationTypeEmptyException]");
+       return type;
     }
 
     public Organization readOrganization() throws InvalidDataException {

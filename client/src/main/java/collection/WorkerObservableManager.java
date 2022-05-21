@@ -30,15 +30,11 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
     public void applyChanges(Response response){
         CollectionOperation op = response.getCollectionOperation();
         Collection<Worker> changes = response.getCollection();
+        ObservableList<Worker> old = FXCollections.observableArrayList(collection);
 
         if(op==CollectionOperation.ADD){
             for(Worker worker: changes){
                 super.addWithoutIdGeneration(worker);
-            }
-        }
-        if(op==CollectionOperation.REMOVE){
-            for(Worker worker: changes){
-                super.removeByID(worker.getId());
             }
         }
         if(op==CollectionOperation.UPDATE){
@@ -46,10 +42,17 @@ public class WorkerObservableManager extends WorkerManagerImpl<ObservableList<Wo
                 super.updateByID(worker.getId(),worker);
             }
         }
+
+        if(op==CollectionOperation.REMOVE){
+            for(Worker worker: changes){
+                Collections.copy(old,collection);
+                super.removeByID(worker.getId());
+            }
+        }
         if(controller!=null && op!=CollectionOperation.NONE && changes!=null && !changes.isEmpty()){
             Platform.runLater(()->{
 
-                controller.refreshCanvas();
+                controller.refreshCanvas(op!=CollectionOperation.REMOVE?collection:old, changes, op);
                 controller.refreshTable();
             });
         }

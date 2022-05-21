@@ -25,7 +25,7 @@ public class LoginCommand extends CommandImpl {
                 return new AnswerMsg().info("login successful").setStatus(Response.Status.AUTH_SUCCESS);
             }
         }
-        throw new AuthException("[AuthException] login or password is incorrect");
+        throw new AuthException();
 
     }
 }

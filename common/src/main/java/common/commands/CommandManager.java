@@ -47,7 +47,7 @@ public abstract class CommandManager implements Commandable, Closeable {
     }
 
     public Command getCommand(String s) {
-        if (!hasCommand(s)) throw new NoSuchCommandException();
+        if (!hasCommand(s)) throw new NoSuchCommandException(s);
         return map.get(s);
     }
 

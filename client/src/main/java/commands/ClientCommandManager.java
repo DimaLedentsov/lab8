@@ -73,8 +73,11 @@ public class ClientCommandManager extends CommandManager {
         while (isRunning && inputManager.hasNextLine()) {
             CommandMsg commandMsg = inputManager.readCommand();
             Response answerMsg = runCommand(commandMsg);
-            if (answerMsg.getStatus() == Response.Status.EXIT||answerMsg.getStatus() == Response.Status.ERROR) {
+            if (answerMsg.getStatus() == Response.Status.EXIT) {
                 close();
+                break;
+            } else if(answerMsg.getStatus()== Response.Status.ERROR){
+                break;
             }
         }
     }
@@ -86,8 +89,11 @@ public class ClientCommandManager extends CommandManager {
         while (isRunning && inputManager.hasNextLine()) {
             CommandMsg commandMsg = inputManager.readCommand();
             Response answerMsg = runCommand(commandMsg);
-            if (answerMsg.getStatus() == Response.Status.EXIT||answerMsg.getStatus() == Response.Status.ERROR) {
+            if (answerMsg.getStatus() == Response.Status.EXIT) {
                 close();
+                break;
+            } else if(answerMsg.getStatus()== Response.Status.ERROR){
+                break;
             }
         }
     }

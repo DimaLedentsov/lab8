@@ -1,22 +1,23 @@
 package controllers;
 
 
+import common.connection.CollectionOperation;
 import common.connection.CommandMsg;
 import common.connection.Request;
 import common.connection.Response;
 import common.data.*;
-import common.exceptions.ConnectionException;
-import common.exceptions.ConnectionTimeoutException;
-import common.exceptions.FileException;
-import common.exceptions.InvalidDataException;
+import common.exceptions.*;
 import common.utils.DateConverter;
+import controllers.tools.MapUtils;
 import controllers.tools.TableFilter;
 import controllers.tools.ZoomOperator;
 import javafx.animation.ScaleTransition;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.SortedList;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -612,52 +613,80 @@ public class MainWindowController {
      * Refreshes canvas.
      */
 
-    public void refreshCanvas() {
-        shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
+    public void refreshCanvas(ObservableList<Worker> collection, Collection<Worker> changes, CollectionOperation op) {
+        /*shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
         shapeMap.clear();
         textMap.values().forEach(s -> canvasPane.getChildren().remove(s));
-        textMap.clear();
-        SortedList<Worker> list = workerTable.getItems().sorted((w1,w2)->w1.getSalary()>w2.getSalary()?0:1);
+        textMap.clear();*/
+        SortedList<Worker> list = collection.sorted((w1,w2)->w1.getSalary()>w2.getSalary()?0:1);
+
+
         for (Worker worker : list) {
             if (!userColorMap.containsKey(worker.getUserLogin()))
                 userColorMap.put(worker.getUserLogin(),
                         Color.color(randomGenerator.nextDouble(), randomGenerator.nextDouble(), randomGenerator.nextDouble()));
-
-            double size = Math.min(worker.getSalary()/1000, MAX_SIZE);
-
-            Shape circleObject = new Circle(size, userColorMap.get(worker.getUserLogin()));
-            circleObject.setOnMouseClicked(this::shapeOnMouseClicked);
-            circleObject.translateXProperty().bind(canvasPane.widthProperty().divide(2).add(worker.getCoordinates().getX()));
-            circleObject.translateYProperty().bind(canvasPane.heightProperty().divide(2).subtract(worker.getCoordinates().getY()));
-
-            circleObject.setOpacity(0.5);
-
-            Text textObject = new Text(Integer.toString(worker.getId()));
-            textObject.setOnMouseClicked(circleObject::fireEvent);
-            textObject.setFont(Font.font(size / 3));
-            textObject.setFill(userColorMap.get(worker.getUserLogin()).darker());
-            textObject.translateXProperty().bind(circleObject.translateXProperty().subtract(textObject.getLayoutBounds().getWidth() / 2));
-            textObject.translateYProperty().bind(circleObject.translateYProperty().add(textObject.getLayoutBounds().getHeight() / 4));
-
-            canvasPane.getChildren().add(circleObject);
-            canvasPane.getChildren().add(textObject);
-            shapeMap.put(circleObject, worker.getId());
-            textMap.put(worker.getId(), textObject);
-
-            ScaleTransition circleAnimation = new ScaleTransition(ANIMATION_DURATION, circleObject);
-            ScaleTransition textAnimation = new ScaleTransition(ANIMATION_DURATION, textObject);
-            circleAnimation.setFromX(0);
-            circleAnimation.setToX(1);
-            circleAnimation.setFromY(0);
-            circleAnimation.setToY(1);
-            textAnimation.setFromX(0);
-            textAnimation.setToX(1);
-            textAnimation.setFromY(0);
-            textAnimation.setToY(1);
-            circleAnimation.play();
-            textAnimation.play();
+            if(!changes.contains(worker)) continue;
+            if(op==CollectionOperation.ADD) {
+                addToCanvas(worker);
+            }
+            else if(op==CollectionOperation.REMOVE){
+                removeFromCanvas(worker.getId());
+            }
+            else if(op==CollectionOperation.UPDATE){
+                removeFromCanvas(worker.getId());
+                addToCanvas(worker);
+            }
         }
+        List<Shape> circles = new ArrayList<Shape>(shapeMap.keySet());
+        circles.sort((e1,e2)->((Circle)e1).getRadius()>((Circle)e2).getRadius()?-1:0);
+        List<Shape> texts = new ArrayList<>(textMap.values());
+        canvasPane.getChildren().setAll(circles);
+        canvasPane.getChildren().addAll(texts);
 
+    }
+
+    private void removeFromCanvas(Integer id){
+        Shape shape = MapUtils.getKeyByValue(shapeMap,id);
+        Text text = textMap.get(id);
+        shapeMap.values().remove(id);
+        textMap.remove(id);
+        canvasPane.getChildren().remove(shape);
+        canvasPane.getChildren().remove(text);
+    }
+    private void addToCanvas(Worker worker){
+        double size = Math.min(worker.getSalary() / 1000, MAX_SIZE);
+
+        Shape circleObject = new Circle(size, userColorMap.get(worker.getUserLogin()));
+        circleObject.setOnMouseClicked(this::shapeOnMouseClicked);
+        circleObject.translateXProperty().bind(canvasPane.widthProperty().divide(2).add(worker.getCoordinates().getX()));
+        circleObject.translateYProperty().bind(canvasPane.heightProperty().divide(2).subtract(worker.getCoordinates().getY()));
+
+        circleObject.setOpacity(0.5);
+
+        Text textObject = new Text(Integer.toString(worker.getId()));
+        textObject.setOnMouseClicked(circleObject::fireEvent);
+        textObject.setFont(Font.font(size / 3));
+        textObject.setFill(userColorMap.get(worker.getUserLogin()).darker());
+        textObject.translateXProperty().bind(circleObject.translateXProperty().subtract(textObject.getLayoutBounds().getWidth() / 2));
+        textObject.translateYProperty().bind(circleObject.translateYProperty().add(textObject.getLayoutBounds().getHeight() / 4));
+
+        canvasPane.getChildren().add(circleObject);
+        canvasPane.getChildren().add(textObject);
+        shapeMap.put(circleObject, worker.getId());
+        textMap.put(worker.getId(), textObject);
+
+        ScaleTransition circleAnimation = new ScaleTransition(ANIMATION_DURATION, circleObject);
+        ScaleTransition textAnimation = new ScaleTransition(ANIMATION_DURATION, textObject);
+        circleAnimation.setFromX(0);
+        circleAnimation.setToX(1);
+        circleAnimation.setFromY(0);
+        circleAnimation.setToY(1);
+        textAnimation.setFromX(0);
+        textAnimation.setToX(1);
+        textAnimation.setFromY(0);
+        textAnimation.setToY(1);
+        circleAnimation.play();
+        textAnimation.play();
     }
 
     /**
@@ -669,10 +698,13 @@ public class MainWindowController {
         long id = shapeMap.get(shape);
         for (Worker worker : workerTable.getItems()) {
             if (worker.getId() == id) {
+
                 if(shapeTooltip!=null && shapeTooltip.isShowing()) shapeTooltip.hide();
-                shapeTooltip = new Tooltip(worker.toString());
-                shapeTooltip.setAutoHide(true);
-                shapeTooltip.show(shape,event.getScreenX(),event.getScreenY());
+                if(event.getButton()== MouseButton.SECONDARY) {
+                    shapeTooltip = new Tooltip(worker.toString());
+                    shapeTooltip.setAutoHide(true);
+                    shapeTooltip.show(shape, event.getScreenX(), event.getScreenY());
+                }
                 workerTable.getSelectionModel().select(worker);
                 //shapeTooltip.setText(worker.toString());
                 //shapeTooltip.show(primaryStage);
@@ -722,14 +754,7 @@ public class MainWindowController {
             Locale locale = localeMap.get(languageComboBox.getValue());
             resourceFactory.setResources(ResourceBundle.getBundle
                     (App.BUNDLE, locale));
-            switch (locale.toString()){
-                case "en_NZ":
-                    DateConverter.setPattern("yyyy-MM-dd");
-                    break;
-                case "ru_RU":
-                    DateConverter.setPattern("yyyy/MM/dd");
-                    break;
-            }
+            DateConverter.setPattern(resourceFactory.getRawString("DateFormat"));
 
             System.out.println(locale);
             workerTable.refresh();
