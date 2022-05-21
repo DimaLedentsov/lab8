@@ -251,14 +251,6 @@ public class MainWindowController {
 
             return cell;
         });
-
-        //workerTable.setItems(FXCollections.observableArrayList());
-       //s TableFilter<Worker> tableFilter = TableFilter.forTableView(workerTable).apply();
-        /*workerTable.setOnSort((e)->{
-            workerTable.getSortOrder().stream().sorted().collect();
-        });*/
-        //FilteredTableView y;
-
     }
 
     public void initFilter(){
@@ -312,12 +304,6 @@ public class MainWindowController {
 
             }
         });
-        /*canvasPane.setOnMouseDragged(event -> {
-            canvasPane.setManaged(false);
-            canvasPane.setTranslateX(event.getX() + canvasPane.getTranslateX());
-            canvasPane.setTranslateY(event.getY() + canvasPane.getTranslateY());
-            event.consume();
-        });*/
 
         zoomOperator.draggable(canvasPane);
         canvasPane.setMinWidth(2000);
