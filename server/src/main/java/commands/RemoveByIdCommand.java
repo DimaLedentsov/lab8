@@ -11,6 +11,7 @@ import common.data.Worker;
 import common.exceptions.*;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static common.utils.Parser.parseId;
 
@@ -39,7 +40,7 @@ public class RemoveByIdCommand extends CommandImpl {
             throw new PermissionException(owner);
         Worker worker = collectionManager.getByID(id);
         collectionManager.removeByID(id);
-        return new AnswerMsg().info( "element #" + id + " removed").setCollection(Arrays.asList(worker));
+        return new AnswerMsg().info( "element #" + id + " removed").setCollection(List.of(worker));
     }
 
 }

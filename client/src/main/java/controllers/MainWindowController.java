@@ -49,19 +49,6 @@ import java.util.*;
  * Main window controller.
  */
 public class MainWindowController {
-    public static final String LOGIN_COMMAND_NAME = "login";
-    public static final String REGISTER_COMMAND_NAME = "register";
-    public static final String REFRESH_COMMAND_NAME = "refresh";
-    public static final String INFO_COMMAND_NAME = "info";
-    public static final String ADD_COMMAND_NAME = "add";
-    public static final String UPDATE_COMMAND_NAME = "update";
-    public static final String REMOVE_COMMAND_NAME = "remove_by_id";
-    public static final String CLEAR_COMMAND_NAME = "clear";
-    public static final String EXIT_COMMAND_NAME = "exit";
-    public static final String ADD_IF_MIN_COMMAND_NAME = "add_if_min";
-    public static final String REMOVE_GREATER_COMMAND_NAME = "remove_greater";
-    public static final String HISTORY_COMMAND_NAME = "history";
-    public static final String SUM_OF_HEALTH_COMMAND_NAME = "sum_of_health";
 
     private final long RANDOM_SEED = 1821L;
     private final Duration ANIMATION_DURATION = Duration.millis(800);
@@ -119,6 +106,9 @@ public class MainWindowController {
     private Button filterStartsWithNameButton;
     @FXML
     private Button groupByEndDateButton;
+    @FXML
+    private Button removeFirstButton;
+
     @FXML
     private Button printUniqueSalariesButton;
     @FXML
@@ -344,6 +334,7 @@ public class MainWindowController {
         groupByEndDateButton.textProperty().bind(resourceFactory.getStringBinding("GroupByEndDateButton"));
         filterStartsWithNameButton.textProperty().bind(resourceFactory.getStringBinding("FilterStartsWithNameButton"));
         printUniqueSalariesButton.textProperty().bind(resourceFactory.getStringBinding("PrintUniqueSalariesButton"));
+        removeFirstButton.textProperty().bind(resourceFactory.getStringBinding("RemoveFirstButton"));
         refreshButton.textProperty().bind(resourceFactory.getStringBinding("RefreshButton"));
        // helpButton.textProperty().bind(resourceFactory.getStringBinding("HelpButton"));
 
@@ -365,7 +356,7 @@ public class MainWindowController {
      */
     @FXML
     public void refreshButtonOnAction() {
-        requestAction(REFRESH_COMMAND_NAME);
+        processAction(new CommandMsg("show"));
     }
 
     /**
@@ -373,7 +364,7 @@ public class MainWindowController {
      */
     @FXML
     private void infoButtonOnAction() {
-        client.getCommandManager().runCommand(new CommandMsg("info"));
+        processAction(new CommandMsg("info"));
     }
 
 
@@ -382,36 +373,16 @@ public class MainWindowController {
      */
     @FXML
     private void updateButtonOnAction() {
-       /* Worker worker = null;
-        try {
-            worker = new DefaultWorker("a",new Coordinates(1,2L),1000L, DateConverter.parseLocalDate("2000-01-01"),
-                    Position.BAKER,Status.PROBATION,new Organization("XXX",OrganizationType.GOVERNMENT));
-        } catch (InvalidDateFormatException e) {
-            e.printStackTrace();
-        }
-        workerTable.getItems().add(worker);
-*/
+
         Worker worker = workerTable.getSelectionModel().getSelectedItem();
-       // int idx = workerTable.getSelectionModel().getSelectedIndex() + 1;
-        //int i = workerTable.getSelectionModel().getSelectedIndex();
         if(worker!=null) {
             askWindowController.setWorker(worker);
             try {
-                client.getCommandManager().runCommand(new CommandMsg("update").setArgument(Integer.toString(worker.getId())).setWorker(askWindowController.readWorker()));
+                processAction(new CommandMsg("update").setArgument(Integer.toString(worker.getId())).setWorker(askWindowController.readWorker()));
             } catch (InvalidDataException e) {
                 //e.printStackTrace();
             }
         }
-
-
-        /*if (!spaceMarineTable.getSelectionModel().isEmpty()) {
-            long id = spaceMarineTable.getSelectionModel().getSelectedItem().getId();
-            askWindowController.setMarine(spaceMarineTable.getSelectionModel().getSelectedItem());
-            askStage.showAndWait();
-            MarineRaw marineRaw = askWindowController.getAndClear();
-            if (marineRaw != null) requestAction(UPDATE_COMMAND_NAME, id + "", marineRaw);
-        } else OutputterUI.error("UpdateButtonSelectionException");*/
-
     }
 
     /**
@@ -420,12 +391,14 @@ public class MainWindowController {
     @FXML
     private void removeButtonOnAction() {
         Worker worker = workerTable.getSelectionModel().getSelectedItem();
-        if(worker!=null) client.getCommandManager().runCommand(new CommandMsg("remove_by_id").setArgument(Integer.toString(worker.getId())));
-        /*if (!spaceMarineTable.getSelectionModel().isEmpty())
-            requestAction(REMOVE_COMMAND_NAME,
-                    spaceMarineTable.getSelectionModel().getSelectedItem().getId().toString(), null);
-        else OutputterUI.error("RemoveButtonSelectionException");*/
+        if(worker!=null) processAction(new CommandMsg("remove_by_id").setArgument(Integer.toString(worker.getId())));
     }
+
+    @FXML
+    private void removeFirstButtonOnAction() {
+        processAction(new CommandMsg("remove_first"));
+    }
+
 
     /**
      * Clear button on action.
@@ -442,10 +415,18 @@ public class MainWindowController {
     private void executeScriptButtonOnAction() {
         File selectedFile = fileChooser.showOpenDialog(primaryStage);
         if (selectedFile == null) return;
+        Response msg = null;
         try {
-            client.getCommandManager().runFile(selectedFile);
-        } catch (FileException|InvalidDataException e) {
+            msg = client.getCommandManager().runFile(selectedFile);
+        } catch ( InvalidDataException | ConnectionException | FileException | CollectionException|CommandException e) {
             app.getOutputManager().error(e.getMessage());
+        }
+        if(msg!=null){
+            System.out.println(msg.getMessage());
+            if(msg.getStatus()== Response.Status.FINE)
+            app.getOutputManager().info(msg.getMessage());
+            else if (msg.getStatus()== Response.Status.ERROR)
+                app.getOutputManager().error(msg.getMessage());
         }
     }
 
@@ -457,13 +438,10 @@ public class MainWindowController {
         //askWindowController.clearMarine();
 
         try {
-            client.getCommandManager().runCommand(new CommandMsg("add").setWorker(askWindowController.readWorker()));
-        } catch (InvalidDataException e) {
+            processAction(new CommandMsg("add").setWorker(askWindowController.readWorker()));
+        } catch (InvalidDataException ignored) {
 
         }
-        /*workerTable.refresh();
-        refreshCanvas();*/
-        //if (marineRaw != null) requestAction(ADD_COMMAND_NAME, "", marineRaw);*/
     }
     /**
      * Add if min button on action.
@@ -473,7 +451,7 @@ public class MainWindowController {
         try {
             Worker worker = askWindowController.readWorker();
             if(worker!=null) {
-                client.getCommandManager().runCommand(new CommandMsg("add_if_min").setWorker(worker));
+                processAction(new CommandMsg("add_if_min").setWorker(worker));
                 /*workerTable.refresh();
                 refreshCanvas();*/
             }
@@ -488,7 +466,7 @@ public class MainWindowController {
         try {
             Worker worker = askWindowController.readWorker();
             if(worker!=null) {
-                client.getCommandManager().runCommand(new CommandMsg("add_if_max").setWorker(worker));
+                processAction(new CommandMsg("add_if_max").setWorker(worker));
                 /*workerTable.refresh();
                 refreshCanvas();*/
             }
@@ -503,7 +481,7 @@ public class MainWindowController {
      */
     @FXML
     private void groupByEndDateButtonOnAction() {
-        client.getCommandManager().runCommand(new CommandMsg("group_counting_by_end_date"));
+        processAction(new CommandMsg("group_counting_by_end_date"));
     }
 
     /**
@@ -511,7 +489,7 @@ public class MainWindowController {
      */
     @FXML
     private void printUniqueSalariesButtonOnAction() {
-        client.getCommandManager().runCommand(new CommandMsg("print_unique_salary"));
+        processAction(new CommandMsg("print_unique_salary"));
 
     }
 
@@ -529,7 +507,7 @@ public class MainWindowController {
         button.setOnAction((e)->{
             String arg = textField.getText();
             if(arg!=null && !arg.equals("")) {
-                client.getCommandManager().runCommand(new CommandMsg("filter_starts_with_name").setArgument(arg));
+                processAction(new CommandMsg("filter_starts_with_name").setArgument(arg));
                 stage.close();
             }
 
@@ -549,42 +527,18 @@ public class MainWindowController {
     }
     @FXML
     private void helpButtonOnAction(){
-        client.getCommandManager().runCommand(new CommandMsg("help"));
+        processAction(new CommandMsg("help"));
     }
 
     /**
      * Request action.
      */
-    private void requestAction(String commandName, String commandStringArgument, Serializable commandObjectArgument) {
-        /*NavigableSet<SpaceMarine> responsedMarines = client.processRequestToServer(commandName, commandStringArgument,
-                commandObjectArgument);
-        if (responsedMarines != null) {
-            ObservableList<SpaceMarine> marinesList = FXCollections.observableArrayList(responsedMarines);
-            spaceMarineTable.setItems(marinesList);
-            TableFilter.forTableView(spaceMarineTable).apply();
-            spaceMarineTable.getSelectionModel().clearSelection();
-            refreshCanvas();
-        }*/
-    }
-    private boolean askServer(Request request){
-        Response response;
-        try {
-            client.send(request);
-            response = client.receive();
-        } catch (ConnectionTimeoutException e){
-            app.getOutputManager().error("ConnectionTimeoutException");
-        }catch (InvalidDataException|ConnectionException e){
-            app.getOutputManager().error("ConnectionException");
-        }
-        //if(response!=null)
-        return false;
-    }
 
-    /**
-     * Binds request action.
-     */
-    private void requestAction(String commandName) {
-        requestAction(commandName, "", null);
+    private Response processAction(Request request){
+        Response response = client.getCommandManager().runCommand(request);
+        String msg = response.getMessage();
+
+        return response;
     }
 
 
@@ -597,18 +551,12 @@ public class MainWindowController {
      */
 
     public void refreshCanvas(ObservableList<Worker> collection, Collection<Worker> changes, CollectionOperation op) {
-        /*shapeMap.keySet().forEach(s -> canvasPane.getChildren().remove(s));
-        shapeMap.clear();
-        textMap.values().forEach(s -> canvasPane.getChildren().remove(s));
-        textMap.clear();*/
-        SortedList<Worker> list = collection.sorted((w1,w2)->w1.getSalary()>w2.getSalary()?0:1);
 
-
-        for (Worker worker : list) {
+        for (Worker worker : changes) {
             if (!userColorMap.containsKey(worker.getUserLogin()))
                 userColorMap.put(worker.getUserLogin(),
                         Color.color(randomGenerator.nextDouble(), randomGenerator.nextDouble(), randomGenerator.nextDouble()));
-            if(!changes.contains(worker)) continue;
+            //if(!changes.contains(worker)) continue;
             if(op==CollectionOperation.ADD) {
                 addToCanvas(worker);
             }

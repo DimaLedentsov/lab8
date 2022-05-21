@@ -160,7 +160,7 @@ public class App extends Application {
             mainWindowController.setAskStage(askStage);
             mainWindowController.setPrimaryStage(primaryStage);
             mainWindowController.setAskWindowController(askWindowController);
-            mainWindowController.refreshButtonOnAction();
+            //mainWindowController.refreshButtonOnAction();
             mainWindowController.initLangs(resourceFactory);
             mainWindowController.setClient(client);
             mainWindowController.initFilter();

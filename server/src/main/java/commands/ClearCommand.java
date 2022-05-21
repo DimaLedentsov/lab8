@@ -20,7 +20,7 @@ public class ClearCommand extends CommandImpl {
     }
 
     @Override
-    public Response run() throws InvalidDataException {
+    public Response run() {
         AnswerMsg answerMsg = new AnswerMsg();
         if (collectionManager.getCollection().isEmpty()) throw new EmptyCollectionException();
         User user = getArgument().getUser();

@@ -274,14 +274,15 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
     public Collection<Worker> clear(User user) {
         databaseHandler.setCommitMode();
         databaseHandler.setSavepoint();
-        Set<Integer> ids = new HashSet<>();
+        Set<Worker> removed = new HashSet<>();
 
         try (PreparedStatement statement = databaseHandler.getPreparedStatement("DELETE FROM WORKERS WHERE user_login=? RETURNING id")) {
             statement.setString(1, user.getLogin());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 Integer id = resultSet.getInt(1);
-                ids.add(id);
+                removed.add(getByID(id));
+                removeByID(id);
             }
         } catch (SQLException | CollectionException e) {
             databaseHandler.rollback();
@@ -290,8 +291,6 @@ public class WorkerDatabaseManager extends WorkerDequeManager {
         } finally {
             databaseHandler.setNormalMode();
         }
-        Collection<Worker> removed = getAll(ids);
-        removeAll(ids);
         return  removed;
     }
 

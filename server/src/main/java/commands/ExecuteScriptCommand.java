@@ -2,10 +2,7 @@ package commands;
 
 import common.commands.CommandImpl;
 import common.commands.CommandType;
-import common.exceptions.FileException;
-import common.exceptions.InvalidDataException;
-import common.exceptions.MissedCommandArgumentException;
-import common.exceptions.RecursiveScriptExecuteException;
+import common.exceptions.*;
 
 public class ExecuteScriptCommand extends CommandImpl {
     ServerCommandManager commandManager;
@@ -16,7 +13,7 @@ public class ExecuteScriptCommand extends CommandImpl {
     }
 
     @Override
-    public String execute() throws FileException, InvalidDataException {
+    public String execute() throws FileException, InvalidDataException, ConnectionException {
         if (!hasStringArg()) throw new MissedCommandArgumentException();
         if (commandManager.getStack().contains(getStringArg())) throw new RecursiveScriptExecuteException();
         commandManager.getStack().add(getStringArg());

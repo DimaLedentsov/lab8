@@ -4,6 +4,7 @@ import common.auth.User;
 import common.data.Worker;
 
 import java.io.Serializable;
+import java.net.InetSocketAddress;
 
 public interface Request extends Serializable {
     String getStringArg();
@@ -20,6 +21,8 @@ public interface Request extends Serializable {
 
     Request setStatus(Status s);
 
+    InetSocketAddress getBroadcastAddress();
+    Request setBroadcastAddress(InetSocketAddress address);
     enum Status {
         DEFAULT,
         HELLO,

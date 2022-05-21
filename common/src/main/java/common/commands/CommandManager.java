@@ -80,32 +80,45 @@ public abstract class CommandManager implements Commandable, Closeable {
         }
     }
 
-    public void fileMode(String path) throws FileException, InvalidDataException{
+    public Response fileMode(String path) throws FileException, InvalidDataException, ConnectionException {
         currentScriptFileName = path;
         inputManager = new FileInputManager(path);
         isRunning = true;
+        Response answerMsg = new AnswerMsg();
         while (isRunning && inputManager.hasNextLine()) {
             CommandMsg commandMsg = inputManager.readCommand();
-            Response answerMsg = runCommand(commandMsg);
+            answerMsg = runCommand(commandMsg);
             if (answerMsg.getStatus() == Response.Status.EXIT) {
                 close();
+                break;
+            }
+            if(answerMsg.getStatus()== Response.Status.ERROR){
+                break;
             }
         }
+        return answerMsg;
     }
 
     public Response runCommand(Request msg) {
         AnswerMsg res = new AnswerMsg();
         try {
-            Command cmd = getCommand(msg);
-            cmd.setArgument(msg);
-            res = (AnswerMsg) cmd.run();
-            res.setCollectionOperation(cmd.getOperation());
+            res = (AnswerMsg) runCommandUnsafe(msg);
 
         } catch (ExitException e) {
             res.setStatus(Response.Status.EXIT);
         } catch (CommandException | InvalidDataException | ConnectionException | FileException | CollectionException e) {
             res.error(e.getMessage());
         }
+        return res;
+    }
+    public Response runCommandUnsafe(Request msg) throws CommandException, InvalidDataException, ConnectionException, FileException, CollectionException {
+        AnswerMsg res = new AnswerMsg();
+
+            Command cmd = getCommand(msg);
+            cmd.setArgument(msg);
+            res = (AnswerMsg) cmd.run();
+            res.setCollectionOperation(cmd.getOperation());
+
         return res;
     }
 

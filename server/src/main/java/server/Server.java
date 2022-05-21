@@ -113,7 +113,6 @@ public class Server extends Thread implements SenderReceiver {
         try {
             clientAddress = (InetSocketAddress) channel.receive(buf);
             if (clientAddress == null) return; //no data to read
-            if(!activeClients.contains(clientAddress)) activeClients.add(clientAddress);
             Log.logger.trace("received request from " + clientAddress.toString());
         } catch (ClosedChannelException e) {
             throw new ClosedConnectionException();
@@ -126,10 +125,20 @@ public class Server extends Thread implements SenderReceiver {
         } catch (ClassNotFoundException | ClassCastException | IOException e) {
             throw new InvalidReceivedDataException();
         }
+        if(request!=null&&request.getBroadcastAddress()!=null) {
+            activeClients.add(request.getBroadcastAddress());
+            Log.logger.trace("added broadcast address "+request.getBroadcastAddress().toString());
+        }
         requestQueue.offer(new AbstractMap.SimpleEntry<>(clientAddress, request));
 
     }
 
+    private void broadcast(Response response, InetSocketAddress currentAddress) {
+        Log.logger.trace("broadcasting changes");
+        for(InetSocketAddress client: activeClients){
+            if(!currentAddress.equals(client)) responseQueue.offer(new AbstractMap.SimpleEntry<>(client, response));
+        }
+    }
     public void broadcast(Response response) {
         Log.logger.trace("broadcasting changes");
         for(InetSocketAddress client: activeClients){
@@ -161,14 +170,15 @@ public class Server extends Thread implements SenderReceiver {
         AnswerMsg answerMsg = new AnswerMsg();
         try {
 
+            InetSocketAddress client = request.getBroadcastAddress();
             if(request.getStatus()==Request.Status.EXIT){
-                activeClients.remove(address);
+                activeClients.remove(client);
                 Log.logger.info("client " + address.toString() + " shut down");
                 return;
             }
             if(request.getStatus()==Request.Status.HELLO){
                 answerMsg = new AnswerMsg().setStatus(Response.Status.COLLECTION).setCollectionOperation(CollectionOperation.ADD).setCollection(collectionManager.getCollection());
-                activeClients.add(address);
+                activeClients.add(client);
                 responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
                 return;
             }
@@ -200,13 +210,12 @@ public class Server extends Thread implements SenderReceiver {
         }
 
 
-        System.out.println(commandManager.getCommand(request).getOperation().toString());
+        //System.out.println(commandManager.getCommand(request).getOperation().toString());
         if(answerMsg.getCollectionOperation()!= CollectionOperation.NONE && answerMsg.getStatus()==Response.Status.FINE){
             answerMsg.setStatus(Response.Status.BROADCAST);
-            broadcast(answerMsg);
-        }else {
-            responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
+            broadcast(answerMsg, request.getBroadcastAddress());
         }
+        responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
         //responseQueue.offer(new AbstractMap.SimpleEntry<>(address, answerMsg));
     }
 

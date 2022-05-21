@@ -81,6 +81,7 @@
                     <Tooltip fx:id="removeButtonTooltip" text="RemoveButtonTooltip" />
                 </tooltip>
             </Button>
+         <Button fx:id="removeFirstButton" mnemonicParsing="false" onAction="#removeFirstButtonOnAction" text="RemoveFirstButton" />
             <Button fx:id="clearButton" mnemonicParsing="false" onAction="#clearButtonOnAction" text="ClearButton">
                 <tooltip>
                     <Tooltip fx:id="clearButtonTooltip" text="ClearButtonTooltip" />

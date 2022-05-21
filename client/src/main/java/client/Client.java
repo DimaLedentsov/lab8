@@ -26,6 +26,7 @@ import static common.io.ConsoleOutputter.printErr;
  */
 public class Client extends Thread implements SenderReceiver {
     private SocketAddress address;
+    private InetSocketAddress host;
     private DatagramSocket socket;
     private DatagramSocket broadcastSocket;
     public final int MAX_TIME_OUT = 500;
@@ -98,7 +99,9 @@ public class Client extends Thread implements SenderReceiver {
         }
         try {
             socket = new DatagramSocket();
-            broadcastSocket = new DatagramSocket(3333);
+            broadcastSocket = new DatagramSocket();
+            host = new InetSocketAddress(InetAddress.getByName("localhost"), broadcastSocket.getLocalPort());
+           // broadcastSocket.bind(host);
             socket.setSoTimeout(MAX_TIME_OUT);
         } catch (IOException e) {
             throw new ConnectionException("cannot open socket");
@@ -114,6 +117,7 @@ public class Client extends Thread implements SenderReceiver {
     public void send(Request request) throws ConnectionException {
         try {
             //request.setStatus(Request.Status.SENT_FROM_CLIENT);
+            request.setBroadcastAddress(host);
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(BUFFER_SIZE);
             ObjectOutputStream objOutput = new ObjectOutputStream(byteArrayOutputStream);
             objOutput.writeObject(request);
@@ -222,13 +226,17 @@ public class Client extends Thread implements SenderReceiver {
         hello.setStatus(Request.Status.HELLO);
         try {
             send(hello);
-        } catch (ConnectionException e) {
+            Response response = receive();
+            if(response.getStatus()== Response.Status.COLLECTION&&response.getCollection()!=null&&response.getCollectionOperation()==CollectionOperation.ADD){
+                collectionManager.applyChanges(response);
+            }
+        } catch (ConnectionException | InvalidDataException e) {
             printErr("cannot load collection from server");
         }
         while (running) {
             try {
                 receivedRequest = false;
-                Response response = receiveWithoutTimeLimits();
+                Response response = receiveBroadcast();
                 String msg = response.getMessage();
                 switch (response.getStatus()) {
                     case COLLECTION:
@@ -251,11 +259,7 @@ public class Client extends Thread implements SenderReceiver {
                         break;
                         //TODO when server closed exit on login
                     case FINE:
-                        try {
-                            outputManager.info(msg);
-                        } catch (ResourceException ignored){
-
-                        }
+                        outputManager.info(msg);
                         break;
                     case ERROR:
                         outputManager.error(msg);
@@ -321,6 +325,9 @@ public class Client extends Thread implements SenderReceiver {
     public boolean isAuthSuccess(){
         return authSuccess;
     }
+    public void setAuthSuccess(boolean f){
+        authSuccess = f;
+    }
     public WorkerObservableManager getWorkerManager(){
         return collectionManager;
     }
@@ -349,6 +356,7 @@ public class Client extends Thread implements SenderReceiver {
         running = false;
         commandManager.close();
         socket.close();
+        broadcastSocket.close();
     }
 
 }

@@ -3,6 +3,8 @@ package common.connection;
 import common.auth.User;
 import common.data.Worker;
 
+import java.net.InetSocketAddress;
+
 /**
  * Message witch include command and arguments
  */
@@ -12,7 +14,7 @@ public class CommandMsg implements Request {
     private Worker worker;
     private User user;
     private Request.Status status;
-
+    private InetSocketAddress address;
     public CommandMsg(String commandNm, String commandSA, Worker w) {
         commandName = commandNm;
         commandStringArgument = commandSA;
@@ -89,5 +91,14 @@ public class CommandMsg implements Request {
 
     public User getUser() {
         return user;
+    }
+
+
+    public InetSocketAddress getBroadcastAddress() {
+        return address;
+    }
+    public CommandMsg setBroadcastAddress(InetSocketAddress addr){
+        address=addr;
+        return this;
     }
 }

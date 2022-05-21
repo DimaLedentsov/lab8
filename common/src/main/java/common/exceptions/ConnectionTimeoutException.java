@@ -5,6 +5,6 @@ package common.exceptions;
  */
 public class ConnectionTimeoutException extends ConnectionException {
     public ConnectionTimeoutException() {
-        super("response timed out");
+        super("[TimeoutException]", "connection timeout");
     }
 }
