@@ -66,7 +66,7 @@ public class ClientCommandManager extends CommandManager {
         return res;
     }
     @Override
-    public void fileMode(String path) throws FileException {
+    public void fileMode(String path) throws FileException,InvalidDataException {
         currentScriptFileName=path;
         inputManager = new FileInputManager(path);
         isRunning = true;
@@ -82,7 +82,7 @@ public class ClientCommandManager extends CommandManager {
         }
     }
 
-    public void runFile(File file) throws FileException{
+    public void runFile(File file) throws FileException,InvalidDataException{
         currentScriptFileName=file.getName();
         inputManager = new FileInputManager(file);
         isRunning = true;

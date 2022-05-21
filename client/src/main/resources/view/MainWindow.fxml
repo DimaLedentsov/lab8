@@ -124,7 +124,6 @@
             <Insets />
          </HBox.margin>
         </Button>
-      <Button fx:id="helpButton" mnemonicParsing="false" onAction="#helpButtonOnAction" text="HelpButton" />
         <ComboBox fx:id="languageComboBox" prefWidth="150.0" />
     </HBox>
 </AnchorPane>

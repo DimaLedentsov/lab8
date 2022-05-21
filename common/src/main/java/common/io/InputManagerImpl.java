@@ -40,7 +40,7 @@ public abstract class InputManagerImpl implements InputManager {
     public String readName() throws EmptyStringException {
         String s = read();
         if (s.equals("")) {
-            throw new EmptyStringException();
+            throw new EmptyStringException("[NameEmptyException] name cannot be empty");
         }
         return s;
     }
@@ -58,9 +58,9 @@ public abstract class InputManagerImpl implements InputManager {
         try {
             x = Float.parseFloat(read());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidNumberException("[XCoordFormatException] X must be number");
         }
-        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidNumberException("invalid float value");
+        if (Float.isInfinite(x) || Float.isNaN(x)) throw new InvalidNumberException("[XCoordFormatException] X must be number");
         return x;
     }
 
@@ -69,9 +69,9 @@ public abstract class InputManagerImpl implements InputManager {
         try {
             y = Long.parseLong(read());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidNumberException("[YCoordFormatException] y must be number");
         }
-        if (y <= -123) throw new InvalidNumberException("must be greater than -123");
+        if (y <= -123) throw new InvalidNumberException("[YCoordLimitException] y must be greater than -123");
         return y;
     }
 
@@ -87,10 +87,10 @@ public abstract class InputManagerImpl implements InputManager {
         try {
             s = Long.parseLong(read());
         } catch (NumberFormatException e) {
-            throw new InvalidNumberException();
+            throw new InvalidNumberException("[SalaryFormatException] salary must be number");
         }
 
-        if (s <= 0) throw new InvalidNumberException("must be greater than 0");
+        if (s <= 0) throw new InvalidNumberException("[SalaryLimitException] salary must be greater than 0");
 
         return s;
     }
@@ -100,7 +100,12 @@ public abstract class InputManagerImpl implements InputManager {
         if (buf.equals("")) {
             return null;
         } else {
-            return parseLocalDate(buf);
+            try {
+                return parseLocalDate(buf);
+            }
+            catch (InvalidDateFormatException e){
+                throw new InvalidDateFormatException("[EndDateFormatException] wrong date format");
+            }
         }
     }
 
@@ -112,26 +117,28 @@ public abstract class InputManagerImpl implements InputManager {
             try {
                 return Position.valueOf(s);
             } catch (IllegalArgumentException e) {
-                throw new InvalidEnumException();
+                throw new InvalidEnumException("[PositionFormatException] wrong position");
             }
         }
     }
 
-    public Status readStatus() throws InvalidEnumException {
+    public Status readStatus() throws InvalidDataException {
         String s = read();
+        if(s==null||s.equals("")) throw new EmptyStringException("[StatusEmptyException] status cannot be empty");
         try {
             return Status.valueOf(s);
         } catch (IllegalArgumentException e) {
-            throw new InvalidEnumException();
+            throw new InvalidEnumException("[StatusFormatException] wrong status");
         }
     }
 
-    public OrganizationType readOrganizationType() throws InvalidEnumException {
+    public OrganizationType readOrganizationType() throws InvalidDataException {
         String s = read();
+        if(s==null||s.equals("")) throw new EmptyStringException("[OrganizationTypeEmptyException] organization type cannot be empty");
         try {
             return OrganizationType.valueOf(s);
         } catch (IllegalArgumentException e) {
-            throw new InvalidEnumException();
+            throw new InvalidEnumException("[OrganizationTypeFormatException] wrong organization type");
         }
     }
 
@@ -173,7 +180,7 @@ public abstract class InputManagerImpl implements InputManager {
         return new User(readPassword(), readLogin());
     }
 
-    public CommandMsg readCommand() {
+    public CommandMsg readCommand() throws InvalidDataException{
         String cmd = read();
         String arg = null;
         Worker worker = null;
@@ -184,15 +191,11 @@ public abstract class InputManagerImpl implements InputManager {
             arg = arr[1];
         }
         if (cmd.equals("add") || cmd.equals("add_if_min") || cmd.equals("add_if_max") || cmd.equals("update")) {
-            try {
-                worker = readWorker();
-            } catch (InvalidDataException ignored) {
-            }
+
+            worker = readWorker();
         } else if (cmd.equals("login") || cmd.equals("register")) {
-            try {
-                user = readUser();
-            } catch (InvalidDataException ignored) {
-            }
+            user = readUser();
+
             return new CommandMsg(cmd, null, null, user);
         }
         return new CommandMsg(cmd, arg, worker);

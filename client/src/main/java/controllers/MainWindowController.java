@@ -40,10 +40,6 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.google.jhsheets.filtered.FilteredTableView;
-import org.google.jhsheets.filtered.tablecolumn.*;
-//import org.controlsfx.control.table.TableFilter;
-
 import java.io.File;
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -187,7 +183,7 @@ public class MainWindowController {
         randomGenerator = new Random(RANDOM_SEED);
         localeMap = new HashMap<>();
         localeMap.put("English", new Locale("en", "NZ"));
-        localeMap.put("Русский", new Locale("ru", "RU"));
+        localeMap.put("\u0420\u0443\u0441\u0441\u043a\u0438\u0439", new Locale("ru", "RU"));
         localeMap.put("Deutsche", new Locale("de", "DE"));
         localeMap.put("Dansk", new Locale("da", "DK"));
         languageComboBox.setItems(FXCollections.observableArrayList(localeMap.keySet()));
@@ -333,6 +329,7 @@ public class MainWindowController {
     private void bindGuiLanguage() {
         resourceFactory.setResources(ResourceBundle.getBundle
                 (App.BUNDLE, localeMap.get(languageComboBox.getSelectionModel().getSelectedItem())));
+        DateConverter.setPattern(resourceFactory.getRawString("DateFormat"));
 
         idColumn.textProperty().bind(resourceFactory.getStringBinding("IdColumn"));
         ownerColumn.textProperty().bind(resourceFactory.getStringBinding("OwnerColumn"));
@@ -362,7 +359,7 @@ public class MainWindowController {
         filterStartsWithNameButton.textProperty().bind(resourceFactory.getStringBinding("FilterStartsWithNameButton"));
         printUniqueSalariesButton.textProperty().bind(resourceFactory.getStringBinding("PrintUniqueSalariesButton"));
         refreshButton.textProperty().bind(resourceFactory.getStringBinding("RefreshButton"));
-        helpButton.textProperty().bind(resourceFactory.getStringBinding("HelpButton"));
+       // helpButton.textProperty().bind(resourceFactory.getStringBinding("HelpButton"));
 
         infoButtonTooltip.textProperty().bind(resourceFactory.getStringBinding("InfoButtonTooltip"));
         addButtonTooltip.textProperty().bind(resourceFactory.getStringBinding("AddButtonTooltip"));
@@ -461,7 +458,7 @@ public class MainWindowController {
         if (selectedFile == null) return;
         try {
             client.getCommandManager().runFile(selectedFile);
-        } catch (FileException e) {
+        } catch (FileException|InvalidDataException e) {
             app.getOutputManager().error(e.getMessage());
         }
     }
@@ -748,15 +745,16 @@ public class MainWindowController {
             if (localeMap.get(localeName).equals(resourceFactory.getResources().getLocale()))
                 languageComboBox.getSelectionModel().select(localeName);
         }
-        if (languageComboBox.getSelectionModel().getSelectedItem().isEmpty())
-            languageComboBox.getSelectionModel().selectFirst();
+        if (languageComboBox.getSelectionModel().getSelectedItem().isEmpty()){
+            if(localeMap.containsValue(Locale.getDefault())) languageComboBox.getSelectionModel().select(MapUtils.getKeyByValue(localeMap,Locale.getDefault()));
+            else languageComboBox.getSelectionModel().selectFirst();
+        }
+
         languageComboBox.setOnAction((event) ->{
             Locale locale = localeMap.get(languageComboBox.getValue());
             resourceFactory.setResources(ResourceBundle.getBundle
                     (App.BUNDLE, locale));
             DateConverter.setPattern(resourceFactory.getRawString("DateFormat"));
-
-            System.out.println(locale);
             workerTable.refresh();
         });
         bindGuiLanguage();

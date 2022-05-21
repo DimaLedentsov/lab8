@@ -51,7 +51,7 @@ public class FileManager implements ReaderWriter {
         try {
             InputStreamReader reader = null;
             if (!f.exists()) throw new FileNotExistsException();
-            if (!f.canRead()) throw new FileWrongPermissionsException("cannot read file");
+            if (!f.canRead()) throw new FileWrongPermissionsException();
             InputStream inputStream = new FileInputStream(f);
             reader = new InputStreamReader(inputStream);
             int currectSymbol;
@@ -60,7 +60,7 @@ public class FileManager implements ReaderWriter {
             }
             reader.close();
         } catch (IOException e){
-            throw new FileException("cannot read file");
+            throw new FileException();
         }
         return str;
     }
@@ -82,12 +82,12 @@ public class FileManager implements ReaderWriter {
             if (!file.exists()) {
                 create(file);
             }
-            if (!file.canWrite()) throw new FileWrongPermissionsException("cannot write file");
+            if (!file.canWrite()) throw new FileWrongPermissionsException();
             BufferedWriter writer = new BufferedWriter(new FileWriter(file));
             writer.write(str);
             writer.close();
         } catch (IOException e) {
-            throw new FileException("cannot access file");
+            throw new FileException();
         }
     }
 }

@@ -65,7 +65,10 @@ public abstract class CommandManager implements Commandable, Closeable {
             try {
                 CommandMsg commandMsg = inputManager.readCommand();
                 answerMsg = runCommand(commandMsg);
-            } catch (NoSuchElementException e) {
+            } catch (InvalidDataException ignored){
+
+            }
+            catch (NoSuchElementException e) {
                 close();
                 print("user input closed");
                 break;
@@ -77,7 +80,7 @@ public abstract class CommandManager implements Commandable, Closeable {
         }
     }
 
-    public void fileMode(String path) throws FileException {
+    public void fileMode(String path) throws FileException, InvalidDataException{
         currentScriptFileName = path;
         inputManager = new FileInputManager(path);
         isRunning = true;
@@ -97,11 +100,6 @@ public abstract class CommandManager implements Commandable, Closeable {
             cmd.setArgument(msg);
             res = (AnswerMsg) cmd.run();
             res.setCollectionOperation(cmd.getOperation());
-
-           /* if(res.getCollectionOperation()!= CollectionOperation.NONE){
-                if(res.getCollection()==null) res.setCollection(new HashSet<>());
-                res.getCollection().add(msg.getWorker());
-            }*/
 
         } catch (ExitException e) {
             res.setStatus(Response.Status.EXIT);

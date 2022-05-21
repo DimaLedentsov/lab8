@@ -78,7 +78,7 @@ public interface InputManager {
      * @return
      * @throws InvalidEnumException
      */
-    Status readStatus() throws InvalidEnumException;
+    Status readStatus() throws InvalidDataException;
 
     /**
      * reads organizationType from input
@@ -86,7 +86,7 @@ public interface InputManager {
      * @return
      * @throws InvalidEnumException
      */
-    OrganizationType readOrganizationType() throws InvalidEnumException;
+    OrganizationType readOrganizationType() throws InvalidDataException;
 
     /**
      * reads organization from input
@@ -109,7 +109,7 @@ public interface InputManager {
      *
      * @return
      */
-    CommandMsg readCommand();
+    CommandMsg readCommand() throws InvalidDataException;
 
     /**
      * gets input scanner

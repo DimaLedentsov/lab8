@@ -7,4 +7,7 @@ public class InvalidDateFormatException extends InvalidDataException {
     public InvalidDateFormatException() {
         super("date format must be yyyy-MM-dd");
     }
+    public InvalidDateFormatException(String s){
+        super(s);
+    }
 }

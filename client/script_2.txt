@@ -1,11 +1,11 @@
 login
 t
-ывпып
+t
 show
 info
 add
 ABOBUS
-100.0
+jgjgf
 2
 1000
 2022-02-04

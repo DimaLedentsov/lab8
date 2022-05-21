@@ -3,6 +3,7 @@ package common.commands;
 import common.connection.Request;
 import common.connection.Response;
 import common.exceptions.FileException;
+import common.exceptions.InvalidDataException;
 
 public interface Commandable {
 
@@ -43,5 +44,5 @@ public interface Commandable {
      *
      * @param path
      */
-    void fileMode(String path) throws FileException;
+    void fileMode(String path) throws FileException, InvalidDataException;
 }
